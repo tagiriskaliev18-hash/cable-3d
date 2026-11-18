@@ -564,26 +564,29 @@
       letter-spacing: 0.03em;
     }
 
-    /* Picket Keycaps - Tactile 3D Buttons (Zero Clipping!) */
+    /* Picket Keycaps - Tactile 3D Buttons (Zero Clipping Guaranteed) */
     .picket-tape {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
-      padding: 10px 6px 14px 6px; /* Generous headroom for 3D buttons */
+      overflow-y: visible;
+      padding: 16px 8px 18px 8px; /* Generous headroom for 3D buttons */
+      scrollbar-width: thin;
     }
 
     .picket-cell {
       flex: 1;
-      min-width: 92px;
-      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      min-width: 96px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F4F6F9 100%);
       border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 10px;
-      padding: 9px 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 10px 8px;
       cursor: pointer;
       text-align: center;
       box-shadow: 
-        0 4px 10px rgba(15, 23, 42, 0.06), 
-        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 4px 10px rgba(15, 23, 42, 0.05), 
+        0 1px 3px rgba(15, 23, 42, 0.03),
         inset 0 1px 0 #FFFFFF, 
         inset 0 -2px 0 rgba(0, 0, 0, 0.04);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -592,36 +595,38 @@
     }
 
     body.dark-theme .picket-cell {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
       border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      border-top-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
     .picket-cell:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1), inset 0 1px 0 #FFFFFF;
-      border-color: rgba(2, 132, 199, 0.4);
+      background: #FFFFFF;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.09), inset 0 1px 0 #FFFFFF;
+      border-color: rgba(2, 132, 199, 0.35);
     }
 
     .picket-cell.active {
       background: linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%);
       border: 1.5px solid #0284C7;
+      border-top: 1.5px solid #38BDF8;
       box-shadow: 
-        0 6px 18px rgba(2, 132, 199, 0.28), 
-        inset 0 1px 0 #FFFFFF, 
+        0 0 0 1px #0284C7, 
+        0 8px 22px rgba(2, 132, 199, 0.26), 
+        inset 0 1px 1px #FFFFFF, 
         inset 0 -1px 0 rgba(2, 132, 199, 0.2);
-      transform: translateY(-2px);
     }
 
     body.dark-theme .picket-cell.active {
-      background: linear-gradient(180deg, rgba(2, 132, 199, 0.35) 0%, rgba(2, 132, 199, 0.15) 100%);
+      background: linear-gradient(180deg, rgba(2, 132, 199, 0.3) 0%, rgba(2, 132, 199, 0.1) 100%);
       border-color: #38BDF8;
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 0 1px #38BDF8, 0 8px 24px rgba(56, 189, 248, 0.32);
     }
 
     .picket-cell:active {
-      transform: translateY(1px) scale(0.98);
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.08);
+      transform: scale(0.97);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.08);
     }
 
     .picket-cell .km-lbl {
@@ -758,18 +763,28 @@
       line-height: 1.4;
     }
 
-    /* Mini Inspector Strip under Chart */
-    .inspect-box {
-      background: var(--glass-surface-subtle);
-      border: 1px solid var(--glass-border-hairline);
-      border-radius: var(--radius-sm);
-      padding: 8px 14px;
+    /* Directly Integrated Live Inspector Bar inside Chart Box */
+    .chart-stats-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
       gap: 8px;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: 10px;
     }
 
-    .insp-col .t {
+    body.dark-theme .chart-stats-bar {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .c-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .c-stat-lbl {
       font-size: 9.5px;
       font-weight: 700;
       color: var(--text-muted);
@@ -777,12 +792,11 @@
       letter-spacing: 0.03em;
     }
 
-    .insp-col .v {
-      font-size: 12px;
+    .c-stat-val {
+      font-size: 13px;
       font-weight: 800;
       color: var(--text-primary);
       font-family: var(--font-mono);
-      margin-top: 1px;
     }
 
     /* ==========================================================
@@ -1460,6 +1474,7 @@
             <div class="chart-title-wrap">
               <div class="chart-main-title">
                 Суточная динамика демонтажа и репер 10 км
+                <span class="brand-tag-ica" id="chart-tag-range" style="font-size: 11px;">ПК 971,5 – 966,86</span>
               </div>
               <div class="chart-sub-title">
                 Участок ПК 971,5 – 966,86 (4.64 км) · Джангалинское ЛПУ · САЦ-4
@@ -1475,32 +1490,32 @@
             </div>
           </div>
 
+          <!-- DIRECTLY ATTACHED LIVE INSPECTOR STRIP INSIDE THE CHART -->
+          <div class="chart-stats-bar">
+            <div class="c-stat-item">
+              <span class="c-stat-lbl">Инспекция</span>
+              <span class="c-stat-val" id="ins-km" style="color: #0284C7;">ПК 971,5 – 966,86</span>
+            </div>
+            <div class="c-stat-item">
+              <span class="c-stat-lbl">Период работ</span>
+              <span class="c-stat-val" id="ins-per">Ноябрь 2026 г.</span>
+            </div>
+            <div class="c-stat-item">
+              <span class="c-stat-lbl">Вскрыто траншеи</span>
+              <span class="c-stat-val" id="ins-dug" style="color: #D97706;">4 640 м</span>
+            </div>
+            <div class="c-stat-item">
+              <span class="c-stat-lbl">Кабель (2 нитки)</span>
+              <span class="c-stat-val" id="ins-cab" style="color: #0284C7;">9 280 м</span>
+            </div>
+            <div class="c-stat-item">
+              <span class="c-stat-lbl">Обратная засыпка</span>
+              <span class="c-stat-val" id="ins-back" style="color: #7C3AED;">3 445 м</span>
+            </div>
+          </div>
+
           <canvas id="daily-chart"></canvas>
           <div id="chart-tip"></div>
-        </div>
-
-        <!-- Mini Inspector Strip under Chart -->
-        <div class="inspect-box">
-          <div class="insp-col">
-            <div class="t">Участок</div>
-            <div class="v" id="ins-km">ПК 971,5 – 966,86 км</div>
-          </div>
-          <div class="insp-col">
-            <div class="t">Период</div>
-            <div class="v" id="ins-per">Ноябрь 2026 г.</div>
-          </div>
-          <div class="insp-col">
-            <div class="t">Вскрыто</div>
-            <div class="v" id="ins-dug">4 640 м</div>
-          </div>
-          <div class="insp-col">
-            <div class="t">Кабель (2 нитки)</div>
-            <div class="v" id="ins-cab">9 280 м</div>
-          </div>
-          <div class="insp-col">
-            <div class="t">Засыпка</div>
-            <div class="v" id="ins-back">3 445 м</div>
-          </div>
         </div>
 
       </section>
@@ -1525,21 +1540,21 @@
 
           <!-- Camera Preset Buttons with Icons -->
           <div class="cam-btn-group">
-            <button class="cam-icon-btn" id="cam-iso" title="Изометрический вид">
+            <button class="cam-icon-btn" id="cam-iso" title="Ракурс 1">
               <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-              Изо
+              <span id="cam-lbl-1">Изо</span>
             </button>
-            <button class="cam-icon-btn" id="cam-front" title="Торец (Срез)">
+            <button class="cam-icon-btn" id="cam-front" title="Ракурс 2">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
-              Срез
+              <span id="cam-lbl-2">Срез</span>
             </button>
-            <button class="cam-icon-btn" id="cam-side" title="Вид сбоку">
+            <button class="cam-icon-btn" id="cam-side" title="Ракурс 3">
               <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12"/><line x1="5" y1="8" x2="19" y2="8"/></svg>
-              Сбоку
+              <span id="cam-lbl-3">Сбоку</span>
             </button>
-            <button class="cam-icon-btn" id="cam-top" title="Вид сверху (План)">
+            <button class="cam-icon-btn" id="cam-top" title="Ракурс 4">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-              Сверху
+              <span id="cam-lbl-4">Сверху</span>
             </button>
           </div>
         </div>
@@ -1553,7 +1568,7 @@
           <!-- Viewport HUD Overlay -->
           <div class="vhud-overlay">
             <div class="vhud-tag" id="hud-title">Кабель МКСБ 4×4×1.2 (ГОСТ 15125-92)</div>
-            <div class="vhud-tag" style="opacity: 0.85;" id="hud-sub">Длина: 90 ед. · 16 медных жил d=1.2 мм · PBR материалы</div>
+            <div class="vhud-tag" style="opacity: 0.85;" id="hud-sub">16 медных жил · 7 слоёв · PBR материалы</div>
           </div>
 
           <!-- Interactive Action Controls -->
@@ -1864,6 +1879,7 @@
           document.querySelectorAll('.picket-cell').forEach(c => c.classList.remove('active'));
           cell.classList.add('active');
           document.getElementById('ins-km').innerText = s.km;
+          document.getElementById('chart-tag-range').innerText = s.km;
           document.getElementById('ins-per').innerText = s.per;
           document.getElementById('ins-dug').innerText = `${s.dug.toLocaleString('ru-RU')} м`;
           document.getElementById('ins-cab').innerText = `${s.cable.toLocaleString('ru-RU')} м`;
@@ -2251,44 +2267,54 @@
 
     function createPipeTexture() {
       const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 256;
+      cvs.width = 1024; cvs.height = 256;
       const ctx = cvs.getContext('2d');
 
-      // Blue-gray industrial pipe paint with wear
+      // Heavy industrial bituminous/polymer protective coating (Dark Charcoal Slate)
       const grad = ctx.createLinearGradient(0, 0, 0, 256);
-      grad.addColorStop(0, '#4A7DA8');
-      grad.addColorStop(0.3, '#3A6D98');
-      grad.addColorStop(0.7, '#2A5D88');
-      grad.addColorStop(1, '#1A4D78');
+      grad.addColorStop(0, '#222832');
+      grad.addColorStop(0.2, '#1E232B');
+      grad.addColorStop(0.5, '#282E38');
+      grad.addColorStop(0.8, '#1A1E25');
+      grad.addColorStop(1, '#15181E');
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 512, 256);
+      ctx.fillRect(0, 0, 1024, 256);
 
-      // Scratches and weathering
-      for (let i = 0; i < 200; i++) {
-        const x = Math.random() * 512;
-        const y = Math.random() * 256;
-        ctx.strokeStyle = `rgba(${180 + Math.random() * 40}, ${180 + Math.random() * 40}, ${180 + Math.random() * 40}, ${0.08 + Math.random() * 0.12})`;
-        ctx.lineWidth = 0.5 + Math.random();
+      // Spiral factory insulation wrap lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 2;
+      for (let x = -256; x < 1024 + 256; x += 64) {
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 8);
+        ctx.moveTo(x, 0); ctx.lineTo(x + 128, 256);
         ctx.stroke();
       }
 
-      // Rust spots near bottom
-      for (let i = 0; i < 80; i++) {
-        const x = Math.random() * 512;
-        const y = 180 + Math.random() * 76;
-        const r = 1 + Math.random() * 4;
-        ctx.fillStyle = `rgba(${120 + Math.random() * 60}, ${60 + Math.random() * 30}, ${20 + Math.random() * 20}, ${0.15 + Math.random() * 0.2})`;
+      // Yellow safety caution stripes (ГОСТ 14202-69)
+      ctx.fillStyle = '#EAB308';
+      ctx.fillRect(40, 100, 12, 56);
+      ctx.fillRect(60, 100, 12, 56);
+      ctx.fillRect(80, 100, 12, 56);
+
+      // Professional Technical Stencil Text
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText('МГ "САЦ-4" · ДУ 1420 · РУ 5.4 МПа · QAZAQGAZ / ICA', 120, 136);
+
+      // Micro weathering / scratches
+      for (let i = 0; i < 300; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 256;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.03 + Math.random() * 0.06})`;
+        ctx.lineWidth = 0.6;
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random() - 0.5) * 30, y + (Math.random() - 0.5) * 4);
+        ctx.stroke();
       }
 
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(12, 1);
+      tex.repeat.set(8, 1);
       return tex;
     }
 
@@ -2828,36 +2854,7 @@
       moist.position.set(5, -depth + 0.12, 0);
       trenchGroup.add(moist);
 
-      // CAD labels with better positioning
-      const makeTag = (text, pos, accent) => {
-        const c = document.createElement('canvas');
-        c.width = 420; c.height = 80;
-        const ctx = c.getContext('2d');
 
-        // Semi-transparent glass pill
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-        ctx.beginPath(); ctx.roundRect(4, 4, 412, 72, 14); ctx.fill();
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 22px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(text, 210, 48);
-
-        const tex = new THREE.CanvasTexture(c);
-        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
-        sp.position.copy(pos);
-        sp.scale.set(9.5, 2.0, 1);
-        trenchGroup.add(sp);
-      };
-
-      makeTag('Глубина h = 1.20 м', new THREE.Vector3(25, -2, 18), '#38BDF8');
-      makeTag('Ширина дна b = 0.80 м', new THREE.Vector3(-15, -depth + 0.8, 0), '#38BDF8');
-      makeTag('Сигнальная лента 0.4м', new THREE.Vector3(10, -depth + 4.5, 10), '#FFD600');
-      makeTag('Нить №1 (Основная)', new THREE.Vector3(-25, -depth + 1.5, -8), '#F59E0B');
-      makeTag('Нить №2 (Резерв)', new THREE.Vector3(-25, -depth + 1.5, 8), '#F59E0B');
 
       // Contact shadow on trench floor
       const fShadGeo = new THREE.PlaneGeometry(trenchLen, bottomW * 0.9);
@@ -3158,14 +3155,16 @@
         { name: '◀ ФРОНТ ПК 966,86', pos: new THREE.Vector3(25, 0, 3.5), color: '#0284C7' }
       ];
 
-      trackPickets.forEach((p) => {
-        // Concrete post
+      trackPickets.forEach((p, i) => {
+        // Concrete post offset cleanly from machines
         const post = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.8, 0.4), postMat);
-        post.position.set(p.pos.x, -0.4, p.pos.z + 2);
+        const postZ = p.pos.z + (i === 4 ? 5.8 : 2.2);
+        const posX = p.pos.x + (i === 4 ? 4 : 0);
+        post.position.set(posX, -0.4, postZ);
         post.castShadow = true;
         trackGroup.add(post);
 
-        // Label badge
+        // High-contrast floating badge
         const c = document.createElement('canvas');
         c.width = 400; c.height = 80;
         const ctx = c.getContext('2d');
@@ -3180,9 +3179,9 @@
         ctx.fillText(p.name, 200, 48);
 
         const tex = new THREE.CanvasTexture(c);
-        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
-        sp.position.set(p.pos.x, 3.0, p.pos.z + 2);
-        sp.scale.set(9.0, 2.0, 1);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: true }));
+        sp.position.set(posX, 1.6, postZ);
+        sp.scale.set(4.8, 1.1, 1);
         trackGroup.add(sp);
       });
 
@@ -3223,46 +3222,94 @@
     buildRealisticTrench();
     buildRichTrack();
 
-    /* Leader Lines */
+    /* Trench Annotations */
+    const TRENCH_LEADERS = [
+      { name: 'Нить №1 (Основная МКСБ)', anchor: new THREE.Vector3(-12, -8 + 1.0, -1.3), desc: 'Основная кабельная нить КЛС-254 (МКСБ 4×4×1.2 в свинцовой оболочке с броней из стальных лент).', props: { 'Глубина залегания': '1.20 м', 'Марка кабеля': 'МКСБ 4×4×1.2', 'Диаметр': '31.2 мм' } },
+      { name: 'Нить №2 (Резервная МКСБ)', anchor: new THREE.Vector3(-12, -8 + 1.0, 1.3), desc: 'Резервная кабельная нить КЛС-254, уложенная параллельно с нормированным расстоянием 100 мм.', props: { 'Расстояние': '100 мм между нитями', 'Назначение': 'Резерв канала связи' } },
+      { name: 'Песчаная подушка h = 100 мм', anchor: new THREE.Vector3(12, -8 + 0.4, 0), desc: 'Демпфирующая постель из просеянного песка для защиты свинцовой оболочки и брони от камней.', props: { 'Материал': 'Песок мелкий/средний', 'Толщина': '100 мм' } },
+      { name: 'Сигнальная лента «Осторожно!»', anchor: new THREE.Vector3(10, -8 + 3.2, 0), desc: 'Ярко-желтая полимерная лента с предупредительной надписью, уложенная на 0.4 м выше кабелей.', props: { 'Положение': '0.40 м над кабелем', 'Ширина': '150 мм' } },
+      { name: 'Глубина траншеи h = 1.20 м', anchor: new THREE.Vector3(-25, -4.0, -4.5), desc: 'Траншея трапецеидального профиля по СНиП: глубина 1.20 м, ширина дна 0.80 м, по верху 1.60 м.', props: { 'Глубина h': '1.20 м', 'Ширина дна b': '0.80 м', 'Ширина верха B': '1.60 м' } }
+    ];
+
+    /* Dynamic Leader Lines (Both Cable & Trench, zero overlap with HUD) */
     function updateLeaderLines() {
-      if (currentMode !== 'cable') {
-        svgOverlay.innerHTML = ''; labelsBox.innerHTML = '';
-        return;
-      }
+      svgOverlay.innerHTML = ''; labelsBox.innerHTML = '';
+      if (currentMode === 'track') return;
 
       const rect = container.getBoundingClientRect();
       const w = rect.width; const h = rect.height;
-      let svgHtml = ''; labelsBox.innerHTML = '';
+      let svgHtml = '';
 
-      cableLayers.forEach((l, i) => {
-        const anchor = new THREE.Vector3(l.userData.anchorX, l.userData.radius * 0.95, 0);
-        l.localToWorld(anchor);
+      if (currentMode === 'cable') {
+        cableLayers.forEach((l, i) => {
+          const anchor = new THREE.Vector3(l.userData.anchorX, l.userData.radius * 0.95, 0);
+          l.localToWorld(anchor);
 
-        const screenPos = anchor.clone().project(camera);
-        if (screenPos.z > 1) return;
+          const screenPos = anchor.clone().project(camera);
+          if (screenPos.z > 1) return;
 
-        const x = (screenPos.x * 0.5 + 0.5) * w;
-        const y = (-(screenPos.y * 0.5) + 0.5) * h;
+          const x = (screenPos.x * 0.5 + 0.5) * w;
+          const y = (-(screenPos.y * 0.5) + 0.5) * h;
 
-        const isUp = i % 2 === 0;
-        const labelX = x + (i % 2 === 0 ? 80 : -80);
-        const labelY = y + (isUp ? -50 - (i * 9) : 45 + (i * 8));
+          // Dedicated slots preventing HUD overlap (HUD top-left: 14..320x100, Controls top-right: w-140..w)
+          let labelX, labelY;
+          if (i === 6) { labelX = Math.max(90, x - 40); labelY = h - 65; }
+          else if (i === 5) { labelX = Math.max(160, x - 20); labelY = h - 110; }
+          else if (i === 4) { labelX = Math.max(250, x); labelY = h - 65; }
+          else if (i === 3) { labelX = Math.max(290, w * 0.46); labelY = 115; }
+          else if (i === 2) { labelX = Math.min(w - 200, w * 0.62); labelY = 70; }
+          else if (i === 1) { labelX = Math.min(w - 180, x + 40); labelY = h - 80; }
+          else { labelX = Math.min(w - 220, w * 0.62); labelY = 160; }
 
-        svgHtml += `
-          <polyline points="${x},${y} ${labelX},${labelY}" fill="none" stroke="#0284C7" stroke-width="1.4" stroke-dasharray="3,3" />
-          <circle cx="${x}" cy="${y}" r="3" fill="#0284C7" />
-        `;
+          svgHtml += `
+            <polyline points="${x},${y} ${labelX},${labelY}" fill="none" stroke="#0284C7" stroke-width="1.3" stroke-dasharray="3,3" />
+            <circle cx="${x}" cy="${y}" r="3" fill="#0284C7" />
+          `;
 
-        const lbl = document.createElement('div');
-        lbl.className = 'leader-label';
-        lbl.style.left = `${labelX}px`; lbl.style.top = `${labelY}px`;
-        lbl.innerText = l.userData.spec.name;
-        lbl.onclick = (e) => {
-          e.stopPropagation();
-          showLayer(l.userData.spec);
-        };
-        labelsBox.appendChild(lbl);
-      });
+          const lbl = document.createElement('div');
+          lbl.className = 'leader-label';
+          lbl.style.left = `${labelX}px`; lbl.style.top = `${labelY}px`;
+          lbl.innerText = l.userData.spec.name;
+          lbl.onclick = (e) => {
+            e.stopPropagation();
+            showLayer(l.userData.spec);
+          };
+          labelsBox.appendChild(lbl);
+        });
+      } else if (currentMode === 'trench') {
+        TRENCH_LEADERS.forEach((item, i) => {
+          const anchor = item.anchor.clone();
+          trenchGroup.localToWorld(anchor);
+
+          const screenPos = anchor.clone().project(camera);
+          if (screenPos.z > 1) return;
+
+          const x = (screenPos.x * 0.5 + 0.5) * w;
+          const y = (-(screenPos.y * 0.5) + 0.5) * h;
+
+          let labelX, labelY;
+          if (i === 0) { labelX = Math.max(130, x - 80); labelY = Math.min(h - 75, y + 45); }
+          else if (i === 1) { labelX = Math.min(w - 140, x + 80); labelY = Math.min(h - 75, y + 55); }
+          else if (i === 2) { labelX = Math.min(w - 150, x + 100); labelY = Math.max(120, y - 35); }
+          else if (i === 3) { labelX = Math.min(w - 160, x + 70); labelY = Math.max(105, y - 55); }
+          else { labelX = Math.max(120, x - 90); labelY = Math.max(120, y - 45); }
+
+          svgHtml += `
+            <polyline points="${x},${y} ${labelX},${labelY}" fill="none" stroke="#0284C7" stroke-width="1.3" stroke-dasharray="3,3" />
+            <circle cx="${x}" cy="${y}" r="3" fill="#0284C7" />
+          `;
+
+          const lbl = document.createElement('div');
+          lbl.className = 'leader-label';
+          lbl.style.left = `${labelX}px`; lbl.style.top = `${labelY}px`;
+          lbl.innerText = item.name;
+          lbl.onclick = (e) => {
+            e.stopPropagation();
+            showLayer(item);
+          };
+          labelsBox.appendChild(lbl);
+        });
+      }
 
       svgOverlay.innerHTML = svgHtml;
     }
@@ -3284,7 +3331,7 @@
       document.getElementById('layer-card').classList.remove('open');
     });
 
-    /* Mode switching */
+    /* Mode switching with Adaptive Camera Navigation */
     function switchMode(m) {
       currentMode = m;
       document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
@@ -3300,26 +3347,41 @@
       const bExp = document.getElementById('btn-explode');
       const bFlx = document.getElementById('btn-flex');
 
+      const l1 = document.getElementById('cam-lbl-1');
+      const l2 = document.getElementById('cam-lbl-2');
+      const l3 = document.getElementById('cam-lbl-3');
+      const l4 = document.getElementById('cam-lbl-4');
+
       if (m === 'cable') {
         titleEl.innerText = 'Кабель МКСБ 4×4×1.2 (ГОСТ 15125-92)';
         if (subEl) subEl.innerText = '16 медных жил · 7 слоёв · PBR Physical материалы';
         bExp.style.display = 'flex'; bFlx.style.display = 'flex';
+        if (l1) l1.innerText = 'Изо';
+        if (l2) l2.innerText = 'Срез';
+        if (l3) l3.innerText = 'Сбоку';
+        if (l4) l4.innerText = 'Сверху';
         gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.9, ease: 'power2.inOut' });
         controls.target.set(0, 0, 0);
       } else if (m === 'trench') {
         titleEl.innerText = 'Двухниточная траншея (1.2м в грунте)';
-        if (subEl) subEl.innerText = 'h=1.20м · b=0.80м · Стратифицированный грунт · Normal map';
+        if (subEl) subEl.innerText = 'h=1.20м · b=0.80м · 2 нитки · Песчаная подушка · Лента';
         bExp.style.display = 'none'; bFlx.style.display = 'none';
-        // Dramatic low angle — looking down into trench at slight angle
-        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.9, ease: 'power2.inOut' });
+        if (l1) l1.innerText = 'Изо';
+        if (l2) l2.innerText = 'Профиль';
+        if (l3) l3.innerText = 'Нитки';
+        if (l4) l4.innerText = 'Сверху';
+        gsap.to(camera.position, { x: 28, y: 12, z: 24, duration: 0.9, ease: 'power2.inOut' });
         controls.target.set(0, -5, 0);
       } else if (m === 'track') {
         titleEl.innerText = '3D-Трасса МГ САЦ-4 (880–1134 км)';
         if (subEl) subEl.innerText = 'Газопровод d=1420мм · КЛС-254 · Репер 10 км · Фронт ПК 966,86';
         bExp.style.display = 'none'; bFlx.style.display = 'none';
-        // Lower wider angle — show excavator and pipeline corridor
-        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.9, ease: 'power2.inOut' });
-        controls.target.set(5, -2, -2);
+        if (l1) l1.innerText = 'Панорама';
+        if (l2) l2.innerText = 'Экскаватор';
+        if (l3) l3.innerText = 'Репер 10 км';
+        if (l4) l4.innerText = 'Крановый узел';
+        gsap.to(camera.position, { x: 14, y: 24, z: 46, duration: 0.9, ease: 'power2.inOut' });
+        controls.target.set(5, -1, 0);
       }
     }
 
@@ -3327,40 +3389,63 @@
     document.getElementById('tab-trench').addEventListener('click', () => switchMode('trench'));
     document.getElementById('tab-track').addEventListener('click', () => switchMode('track'));
 
-    /* Camera Presets */
+    /* Adaptive Camera Preset Clicks */
     document.getElementById('cam-iso').addEventListener('click', () => {
       if (currentMode === 'trench') {
-        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.8, ease: 'power2.inOut' });
+        gsap.to(camera.position, { x: 28, y: 12, z: 24, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, -5, 0);
       } else if (currentMode === 'track') {
-        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
-        controls.target.set(5, -2, -2);
+        // Панорама
+        gsap.to(camera.position, { x: 14, y: 24, z: 46, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(5, -1, 0);
       } else {
         gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, 0, 0);
       }
     });
+
     document.getElementById('cam-front').addEventListener('click', () => {
       if (currentMode === 'trench') {
-        gsap.to(camera.position, { x: 50, y: -3, z: 0, duration: 0.8, ease: 'power2.inOut' });
+        // Профиль (срез траншеи)
+        gsap.to(camera.position, { x: 42, y: -2, z: 0, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, -5, 0);
+      } else if (currentMode === 'track') {
+        // Фронт работ (экскаватор + барабан)
+        gsap.to(camera.position, { x: 34, y: 8, z: 20, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(22, 0, 4);
       } else {
         gsap.to(camera.position, { x: 55, y: 0, z: 0, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, 0, 0);
       }
     });
+
     document.getElementById('cam-side').addEventListener('click', () => {
       if (currentMode === 'trench') {
-        gsap.to(camera.position, { x: 0, y: -2, z: 30, duration: 0.8, ease: 'power2.inOut' });
-        controls.target.set(0, -5, 0);
+        // Нитки крупно
+        gsap.to(camera.position, { x: 0, y: -2, z: 20, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -6, 0);
+      } else if (currentMode === 'track') {
+        // Репер 10 км
+        gsap.to(camera.position, { x: -3, y: 6, z: 15, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(-5, 1, 3.5);
       } else {
         gsap.to(camera.position, { x: 0, y: 2, z: 55, duration: 0.8, ease: 'power2.inOut' });
-        controls.target.set(0, currentMode === 'track' ? -2 : 0, 0);
+        controls.target.set(0, 0, 0);
       }
     });
+
     document.getElementById('cam-top').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 0, y: 65, z: 0.1, duration: 0.8, ease: 'power2.inOut' });
-      controls.target.set(0, currentMode === 'trench' ? -5 : currentMode === 'track' ? -2 : 0, 0);
+      if (currentMode === 'trench') {
+        gsap.to(camera.position, { x: 0, y: 55, z: 0.1, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -6, 0);
+      } else if (currentMode === 'track') {
+        // Крановый узел
+        gsap.to(camera.position, { x: -14, y: 8, z: 4, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(-20, 1, -9);
+      } else {
+        gsap.to(camera.position, { x: 0, y: 65, z: 0.1, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, 0, 0);
+      }
     });
 
     /* Controls: Explode, Flex, Rotate, XRay, Reset */
@@ -3399,11 +3484,11 @@
         gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, 0, 0);
       } else if (currentMode === 'trench') {
-        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.8, ease: 'power2.inOut' });
+        gsap.to(camera.position, { x: 28, y: 12, z: 24, duration: 0.8, ease: 'power2.inOut' });
         controls.target.set(0, -5, 0);
       } else {
-        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
-        controls.target.set(5, -2, -2);
+        gsap.to(camera.position, { x: 14, y: 24, z: 46, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(5, -1, 0);
       }
     });
 
