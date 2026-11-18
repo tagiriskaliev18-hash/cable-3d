@@ -1819,11 +1819,15 @@
       if (isDark) {
         scene.background.set(0x090A10);
         scene.fog.color.set(0x090A10);
-        amb.intensity = 0.85;
+        amb.intensity = 0.3;
+        hemi.intensity = 0.3;
+        sun.intensity = 1.8;
       } else {
-        scene.background.set(0xF1F5F9);
-        scene.fog.color.set(0xF1F5F9);
-        amb.intensity = 1.35;
+        scene.background.set(0xE8ECF2);
+        scene.fog.color.set(0xE8ECF2);
+        amb.intensity = 0.4;
+        hemi.intensity = 0.6;
+        sun.intensity = 2.5;
       }
 
       drawChart();
@@ -2058,33 +2062,99 @@
     window.addEventListener('resize', drawChart);
 
     /* ==========================================================
-       3. PROCEDURAL PBR TEXTURES GENERATOR (CANVAS)
-       Zero external image dependencies, 100% offline & crisp!
+       3. PROCEDURAL PBR TEXTURES GENERATOR (CINEMA-GRADE)
+       High-res Canvas textures + normal maps for realism
        ========================================================== */
-    function createSoilTexture() {
+
+    // Simplex-like noise for terrain displacement
+    function noise2D(x, y) {
+      const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+      return (n - Math.floor(n)) * 2 - 1;
+    }
+    function fbm(x, y, oct) {
+      let v = 0, a = 0.5, f = 1;
+      for (let i = 0; i < oct; i++) { v += a * noise2D(x * f, y * f); f *= 2.1; a *= 0.48; }
+      return v;
+    }
+
+    function createSoilTexture(size = 1024) {
       const cvs = document.createElement('canvas');
-      cvs.width = 1024; cvs.height = 1024;
+      cvs.width = size; cvs.height = size;
       const ctx = cvs.getContext('2d');
 
-      // Base Steppe Loam / Clay
-      ctx.fillStyle = '#6E4E36';
-      ctx.fillRect(0, 0, 1024, 1024);
+      // Rich layered soil base
+      const grad = ctx.createLinearGradient(0, 0, 0, size);
+      grad.addColorStop(0, '#5A3D26');
+      grad.addColorStop(0.3, '#6E4E36');
+      grad.addColorStop(0.6, '#7A5A42');
+      grad.addColorStop(1, '#4A3220');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
 
-      // Stratified Horizontal Soil Bands (Геологические горизонты)
-      for (let y = 0; y < 1024; y += 4) {
-        const bandNoise = Math.sin(y * 0.04) * 15 + Math.sin(y * 0.12) * 8;
-        const tone = Math.sin((y + bandNoise) * 0.015);
-        ctx.fillStyle = tone > 0.3 ? 'rgba(74, 46, 28, 0.45)' : tone < -0.3 ? 'rgba(128, 98, 68, 0.4)' : 'rgba(92, 62, 40, 0.25)';
-        ctx.fillRect(0, y, 1024, 4);
+      // Geological strata — wavey horizontal bands
+      for (let y = 0; y < size; y += 2) {
+        const shift = Math.sin(y * 0.03) * 20 + Math.sin(y * 0.11 + 2.3) * 10 + Math.cos(y * 0.007) * 40;
+        const tone = Math.sin((y + shift) * 0.012);
+        const alpha = 0.15 + Math.abs(tone) * 0.3;
+        if (tone > 0.2) ctx.fillStyle = `rgba(50, 32, 18, ${alpha})`;
+        else if (tone < -0.2) ctx.fillStyle = `rgba(150, 118, 85, ${alpha * 0.7})`;
+        else ctx.fillStyle = `rgba(100, 72, 48, ${alpha * 0.5})`;
+        ctx.fillRect(0, y, size, 3);
       }
 
-      // Soil Granularity & Pebbles
-      for (let i = 0; i < 4000; i++) {
-        const x = Math.random() * 1024;
-        const y = Math.random() * 1024;
-        const r = Math.random() * 2.2 + 0.5;
-        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(40, 24, 14, 0.6)' : 'rgba(180, 150, 120, 0.4)';
-        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      // Root-like dark veins
+      ctx.strokeStyle = 'rgba(35, 22, 12, 0.35)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 40; i++) {
+        const sx = Math.random() * size;
+        const sy = Math.random() * size;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        let cx = sx, cy = sy;
+        for (let j = 0; j < 8; j++) {
+          cx += (Math.random() - 0.5) * 30;
+          cy += Math.random() * 20 + 5;
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+      }
+
+      // Pebbles and gravel — varying sizes
+      for (let i = 0; i < 6000; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const r = Math.random() * 2.8 + 0.3;
+        const brightness = 40 + Math.random() * 140;
+        ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.78}, ${brightness * 0.56}, ${0.3 + Math.random() * 0.4})`;
+        ctx.beginPath();
+        ctx.ellipse(x, y, r, r * (0.6 + Math.random() * 0.4), Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 3);
+      tex.anisotropy = 4;
+      return tex;
+    }
+
+    function createSoilNormalMap(size = 512) {
+      const cvs = document.createElement('canvas');
+      cvs.width = size; cvs.height = size;
+      const ctx = cvs.getContext('2d');
+
+      ctx.fillStyle = '#8080FF'; // neutral normal
+      ctx.fillRect(0, 0, size, size);
+
+      // Bump noise
+      for (let y = 0; y < size; y += 2) {
+        for (let x = 0; x < size; x += 2) {
+          const n = fbm(x * 0.015, y * 0.015, 4);
+          const r = Math.floor(128 + n * 40);
+          const g = Math.floor(128 + n * 40);
+          ctx.fillStyle = `rgb(${r},${g},255)`;
+          ctx.fillRect(x, y, 2, 2);
+        }
       }
 
       const tex = new THREE.CanvasTexture(cvs);
@@ -2098,15 +2168,18 @@
       cvs.width = 512; cvs.height = 512;
       const ctx = cvs.getContext('2d');
 
-      ctx.fillStyle = '#D4B372';
+      const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 362);
+      grad.addColorStop(0, '#E0C88A');
+      grad.addColorStop(1, '#C8A86A');
+      ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 512, 512);
 
-      // Fine sand grains
-      for (let i = 0; i < 6000; i++) {
+      for (let i = 0; i < 12000; i++) {
         const x = Math.random() * 512;
         const y = Math.random() * 512;
-        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(168, 134, 76, 0.5)' : 'rgba(235, 210, 155, 0.6)';
-        ctx.fillRect(x, y, 1.5, 1.5);
+        const b = 160 + Math.random() * 80;
+        ctx.fillStyle = `rgba(${b}, ${b * 0.85}, ${b * 0.6}, ${0.3 + Math.random() * 0.4})`;
+        ctx.fillRect(x, y, 1 + Math.random(), 1 + Math.random());
       }
 
       const tex = new THREE.CanvasTexture(cvs);
@@ -2120,27 +2193,102 @@
       cvs.width = 1024; cvs.height = 128;
       const ctx = cvs.getContext('2d');
 
-      ctx.fillStyle = '#FFCC00';
+      ctx.fillStyle = '#FFD600';
       ctx.fillRect(0, 0, 1024, 128);
 
-      // Diagonal Hazard Stripes & Warning Text
       ctx.fillStyle = '#1A1A1A';
-      for (let x = 0; x < 1024; x += 128) {
+      for (let x = -32; x < 1024 + 128; x += 100) {
         ctx.beginPath();
-        ctx.moveTo(x, 0); ctx.lineTo(x + 48, 0);
-        ctx.lineTo(x + 16, 128); ctx.lineTo(x - 32, 128);
+        ctx.moveTo(x, 0); ctx.lineTo(x + 42, 0);
+        ctx.lineTo(x + 10, 128); ctx.lineTo(x - 32, 128);
         ctx.closePath();
         ctx.fill();
       }
 
       ctx.fillStyle = '#000000';
-      ctx.font = 'bold 36px JetBrains Mono';
+      ctx.font = 'bold 32px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('ОСТОРОЖНО! КАБЕЛЬ СВЯЗИ · QAZAQGAZ / ICA', 512, 78);
+      ctx.fillText('⚠ ОСТОРОЖНО! КАБЕЛЬ СВЯЗИ · QAZAQGAZ', 512, 78);
 
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping;
       tex.repeat.set(4, 1);
+      return tex;
+    }
+
+    function createGrassTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext('2d');
+
+      // Dry steppe base
+      const grad = ctx.createLinearGradient(0, 0, 512, 512);
+      grad.addColorStop(0, '#8B7355');
+      grad.addColorStop(0.5, '#9B8565');
+      grad.addColorStop(1, '#7A6345');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Sparse dry grass blades
+      for (let i = 0; i < 2000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const h = 4 + Math.random() * 12;
+        const isGreen = Math.random() > 0.7;
+        ctx.strokeStyle = isGreen ? `rgba(80, 110, 50, ${0.4 + Math.random() * 0.3})` : `rgba(140, 120, 70, ${0.3 + Math.random() * 0.4})`;
+        ctx.lineWidth = 0.5 + Math.random();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + (Math.random() - 0.5) * 6, y - h * 0.6, x + (Math.random() - 0.5) * 4, y - h);
+        ctx.stroke();
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
+      return tex;
+    }
+
+    function createPipeTexture() {
+      const cvs = document.createElement('canvas');
+      cvs.width = 512; cvs.height = 256;
+      const ctx = cvs.getContext('2d');
+
+      // Blue-gray industrial pipe paint with wear
+      const grad = ctx.createLinearGradient(0, 0, 0, 256);
+      grad.addColorStop(0, '#4A7DA8');
+      grad.addColorStop(0.3, '#3A6D98');
+      grad.addColorStop(0.7, '#2A5D88');
+      grad.addColorStop(1, '#1A4D78');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 512, 256);
+
+      // Scratches and weathering
+      for (let i = 0; i < 200; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 256;
+        ctx.strokeStyle = `rgba(${180 + Math.random() * 40}, ${180 + Math.random() * 40}, ${180 + Math.random() * 40}, ${0.08 + Math.random() * 0.12})`;
+        ctx.lineWidth = 0.5 + Math.random();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random() - 0.5) * 40, y + (Math.random() - 0.5) * 8);
+        ctx.stroke();
+      }
+
+      // Rust spots near bottom
+      for (let i = 0; i < 80; i++) {
+        const x = Math.random() * 512;
+        const y = 180 + Math.random() * 76;
+        const r = 1 + Math.random() * 4;
+        ctx.fillStyle = `rgba(${120 + Math.random() * 60}, ${60 + Math.random() * 30}, ${20 + Math.random() * 20}, ${0.15 + Math.random() * 0.2})`;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(12, 1);
       return tex;
     }
 
@@ -2149,29 +2297,34 @@
       cvs.width = 512; cvs.height = 512;
       const ctx = cvs.getContext('2d');
 
-      ctx.fillStyle = '#8C7A68';
+      ctx.fillStyle = '#7A6A58';
       ctx.fillRect(0, 0, 512, 512);
 
-      // Tire track wheel ruts
-      ctx.fillStyle = 'rgba(60, 50, 40, 0.4)';
-      ctx.fillRect(80, 0, 60, 512);
-      ctx.fillRect(360, 0, 60, 512);
+      // Tire ruts with depth
+      ctx.fillStyle = 'rgba(50, 42, 34, 0.5)';
+      ctx.fillRect(70, 0, 70, 512);
+      ctx.fillRect(350, 0, 70, 512);
 
-      for (let i = 0; i < 3000; i++) {
+      // Track center ridge
+      ctx.fillStyle = 'rgba(100, 85, 68, 0.4)';
+      ctx.fillRect(180, 0, 140, 512);
+
+      for (let i = 0; i < 5000; i++) {
         const x = Math.random() * 512;
         const y = Math.random() * 512;
-        ctx.fillStyle = Math.random() > 0.5 ? 'rgba(40, 35, 30, 0.5)' : 'rgba(180, 160, 140, 0.4)';
-        ctx.fillRect(x, y, 2, 2);
+        const b = 30 + Math.random() * 160;
+        ctx.fillStyle = `rgba(${b}, ${b * 0.85}, ${b * 0.7}, ${0.15 + Math.random() * 0.25})`;
+        ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 2);
       }
 
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(1, 6);
+      tex.repeat.set(1, 8);
       return tex;
     }
 
     /* ==========================================================
-       4. THREE.JS 3D SCENE & ENGINE
+       4. THREE.JS CINEMATIC 3D ENGINE
        ========================================================== */
     const container = document.getElementById('viewport-box');
     const canvas = document.getElementById('webgl-canvas');
@@ -2179,10 +2332,10 @@
     const labelsBox = document.getElementById('labels-container');
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xF1F5F9);
-    scene.fog = new THREE.FogExp2(0xF1F5F9, 0.008);
+    scene.background = new THREE.Color(0xE8ECF2);
+    scene.fog = new THREE.FogExp2(0xE8ECF2, 0.005);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 800);
     camera.position.set(36, 18, 38);
 
     const renderer = new THREE.WebGLRenderer({
@@ -2193,50 +2346,95 @@
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.15;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.maxDistance = 220;
+    controls.dampingFactor = 0.08;
+    controls.maxDistance = 180;
     controls.minDistance = 6;
     controls.target.set(0, 0, 0);
+    controls.maxPolarAngle = Math.PI * 0.48;
 
-    /* Studio Environment */
+    /* Rich PMREM Environment — gradient sky with sun disc */
     function initEnv() {
       const pmrem = new THREE.PMREMGenerator(renderer);
       pmrem.compileEquirectangularShader();
       const envS = new THREE.Scene();
 
-      const bg = new THREE.Mesh(new THREE.SphereGeometry(70, 16, 16), new THREE.MeshBasicMaterial({ color: 0xF8FAFC, side: THREE.BackSide }));
-      envS.add(bg);
+      // Sky dome with warm gradient
+      const skyGeo = new THREE.SphereGeometry(80, 32, 32);
+      const skyMat = new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        uniforms: {},
+        vertexShader: `varying vec3 vPos; void main(){ vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+        fragmentShader: `
+          varying vec3 vPos;
+          void main(){
+            float h = normalize(vPos).y;
+            vec3 sky = mix(vec3(0.85, 0.82, 0.78), vec3(0.55, 0.72, 0.92), clamp(h * 1.5, 0.0, 1.0));
+            // Warm horizon band
+            sky = mix(vec3(0.95, 0.88, 0.75), sky, smoothstep(-0.05, 0.25, h));
+            gl_FragColor = vec4(sky, 1.0);
+          }
+        `
+      });
+      envS.add(new THREE.Mesh(skyGeo, skyMat));
 
-      const l1 = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }));
-      l1.position.set(30, 50, 30); l1.lookAt(0,0,0); envS.add(l1);
+      // Key light panel (sun)
+      const sunPanel = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({ color: 0xFFF8E8 }));
+      sunPanel.position.set(40, 55, 35); sunPanel.lookAt(0, 0, 0);
+      envS.add(sunPanel);
 
-      const l2 = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ color: 0xE2E8F0 }));
-      l2.position.set(-30, 20, -30); l2.lookAt(0,0,0); envS.add(l2);
+      // Fill panel (cool sky)
+      const fillPanel = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshBasicMaterial({ color: 0xC8D8E8 }));
+      fillPanel.position.set(-40, 30, -30); fillPanel.lookAt(0, 0, 0);
+      envS.add(fillPanel);
 
-      scene.environment = pmrem.fromScene(envS).texture;
+      // Bounce panel (warm ground reflect)
+      const bouncePanel = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshBasicMaterial({ color: 0xD8C8A8 }));
+      bouncePanel.position.set(0, -20, 0); bouncePanel.lookAt(0, 1, 0);
+      envS.add(bouncePanel);
+
+      scene.environment = pmrem.fromScene(envS, 0, 1, 256).texture;
     }
     initEnv();
 
-    /* Lighting */
-    const amb = new THREE.AmbientLight(0xffffff, 1.35);
+    /* Cinematic Lighting Rig */
+    // Hemisphere light — natural sky+ground
+    const hemi = new THREE.HemisphereLight(0x87CEEB, 0x8B7355, 0.6);
+    scene.add(hemi);
+
+    // Warm ambient
+    const amb = new THREE.AmbientLight(0xFFF8F0, 0.4);
     scene.add(amb);
 
-    const sun = new THREE.DirectionalLight(0xfffdf5, 2.2);
-    sun.position.set(40, 60, 40);
+    // Key sunlight (warm golden hour)
+    const sun = new THREE.DirectionalLight(0xFFF5E0, 2.5);
+    sun.position.set(50, 70, 45);
     sun.castShadow = true;
-    sun.shadow.mapSize.width = 1024;
-    sun.shadow.mapSize.height = 1024;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    sun.shadow.camera.left = -80;
+    sun.shadow.camera.right = 80;
+    sun.shadow.camera.top = 60;
+    sun.shadow.camera.bottom = -40;
+    sun.shadow.camera.near = 10;
+    sun.shadow.camera.far = 200;
+    sun.shadow.bias = -0.001;
     scene.add(sun);
 
-    const skyFill = new THREE.DirectionalLight(0x0284C7, 1.2);
-    skyFill.position.set(-45, 25, -35);
+    // Cool fill from opposite side
+    const skyFill = new THREE.DirectionalLight(0x8AAECE, 0.8);
+    skyFill.position.set(-50, 30, -40);
     scene.add(skyFill);
+
+    // Rim light from behind
+    const rimLight = new THREE.DirectionalLight(0xFFE8C0, 0.5);
+    rimLight.position.set(-30, 15, 60);
+    scene.add(rimLight);
 
     /* Scene Groups */
     const cableGroup = new THREE.Group();
@@ -2256,18 +2454,58 @@
     let currentMode = 'cable';
 
     /* ==========================================================
-       BUILD LONG REALISTIC CABLE (ZERO Z-FIGHTING / 90 UNITS)
+       BUILD CINEMATIC CABLE (PBR PhysicalMaterial + EnvMap)
        ========================================================== */
     function buildLongCable() {
       cableGroup.clear();
       cableLayers.length = 0;
 
-      const matCopper = new THREE.MeshStandardMaterial({ color: 0xD97706, metalness: 0.95, roughness: 0.22 });
-      const matLead = new THREE.MeshStandardMaterial({ color: 0x828B96, metalness: 0.92, roughness: 0.42 });
-      const matPaper = new THREE.MeshStandardMaterial({ color: 0xD8C29D, roughness: 0.75, metalness: 0.05 });
-      const matSteel = new THREE.MeshStandardMaterial({ color: 0xB5BCC2, metalness: 0.96, roughness: 0.35 });
-      const matBedding = new THREE.MeshStandardMaterial({ color: 0x24242A, roughness: 0.88, metalness: 0.1 });
-      const matOuter = new THREE.MeshStandardMaterial({ color: 0x1A1A22, roughness: 0.75, metalness: 0.15 });
+      // Physical materials for photorealistic metals
+      const matCopper = new THREE.MeshPhysicalMaterial({
+        color: 0xD4850B,
+        metalness: 0.98,
+        roughness: 0.18,
+        clearcoat: 0.3,
+        clearcoatRoughness: 0.15,
+        envMapIntensity: 1.5
+      });
+
+      const matLead = new THREE.MeshPhysicalMaterial({
+        color: 0x7B8590,
+        metalness: 0.95,
+        roughness: 0.38,
+        clearcoat: 0.1,
+        envMapIntensity: 1.2
+      });
+
+      const matPaper = new THREE.MeshStandardMaterial({
+        color: 0xD4C299,
+        roughness: 0.78,
+        metalness: 0.02,
+        envMapIntensity: 0.3
+      });
+
+      const matSteel = new THREE.MeshPhysicalMaterial({
+        color: 0xAEB8C2,
+        metalness: 0.97,
+        roughness: 0.28,
+        clearcoat: 0.2,
+        envMapIntensity: 1.4
+      });
+
+      const matBedding = new THREE.MeshStandardMaterial({
+        color: 0x1E1E24,
+        roughness: 0.92,
+        metalness: 0.05,
+        envMapIntensity: 0.2
+      });
+
+      const matOuter = new THREE.MeshStandardMaterial({
+        color: 0x18181E,
+        roughness: 0.82,
+        metalness: 0.1,
+        envMapIntensity: 0.3
+      });
 
       const quadColors = [0xDC2626, 0x2563EB, 0x16A34A, 0xCA8A04];
 
@@ -2286,16 +2524,16 @@
       layersSpec.forEach((spec, idx) => {
         const layerGroup = new THREE.Group();
         layerGroup.name = spec.name;
-
         const len = spec.endX - startX;
         const centerX = startX + len / 2;
 
         if (idx === 0) {
-          // Central Cordel
+          // Central cordel
           const cordelGeo = new THREE.CylinderGeometry(0.48, 0.48, len, 24, 1, true);
           cordelGeo.rotateZ(Math.PI / 2);
           const cordel = new THREE.Mesh(cordelGeo, matPaper);
           cordel.position.x = centerX;
+          cordel.castShadow = true;
           layerGroup.add(cordel);
 
           // 16 Copper Wires in 4 Star-Quads
@@ -2317,11 +2555,12 @@
               }
               const curve = new THREE.CatmullRomCurve3(points);
               const wire = new THREE.Mesh(new THREE.TubeGeometry(curve, 50, 0.16, 8, false), matCopper);
+              wire.castShadow = true;
               layerGroup.add(wire);
             }
           }
         } else if (idx === 1) {
-          // 4 Quad Colored Helical Sleeves
+          // 4 Quad colored helical sleeves
           const pitch = 0.22;
           for (let q = 0; q < 4; q++) {
             const baseAngle = (q * Math.PI) / 2;
@@ -2333,20 +2572,21 @@
               points.push(new THREE.Vector3(x, Math.sin(a) * 1.1, Math.cos(a) * 1.1));
             }
             const curve = new THREE.CatmullRomCurve3(points);
-            const tubeMat = new THREE.MeshStandardMaterial({ color: quadColors[q], roughness: 0.45 });
-            layerGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 45, 0.65, 12, false), tubeMat));
+            const tubeMat = new THREE.MeshStandardMaterial({ color: quadColors[q], roughness: 0.4, envMapIntensity: 0.5 });
+            const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 45, 0.65, 12, false), tubeMat);
+            mesh.castShadow = true;
+            layerGroup.add(mesh);
           }
         } else {
-          // Strict Hollow Cylinders with openEnded: true (ZERO Z-FIGHTING)
           const mat = (idx === 2) ? matPaper : (idx === 3) ? matLead : (idx === 4) ? matBedding : (idx === 5) ? matSteel : matOuter;
-          
           const cylGeo = new THREE.CylinderGeometry(spec.r, spec.r, len, 48, 1, true);
           cylGeo.rotateZ(Math.PI / 2);
           const cyl = new THREE.Mesh(cylGeo, mat);
           cyl.position.x = centerX;
+          cyl.castShadow = true;
+          cyl.receiveShadow = true;
           layerGroup.add(cyl);
 
-          // Non-overlapping Ring Cut at specific end position
           const ringGeo = new THREE.RingGeometry(spec.rIn, spec.r, 48);
           ringGeo.rotateY(Math.PI / 2);
           const ring = new THREE.Mesh(ringGeo, mat);
@@ -2354,113 +2594,186 @@
           layerGroup.add(ring);
         }
 
-        layerGroup.userData = {
-          spec: spec,
-          origX: 0,
-          expX: spec.expOffset,
-          anchorX: spec.endX - 3,
-          radius: spec.r
-        };
-
+        layerGroup.userData = { spec, origX: 0, expX: spec.expOffset, anchorX: spec.endX - 3, radius: spec.r };
         cableGroup.add(layerGroup);
         cableLayers.push(layerGroup);
       });
 
-      cableGroup.position.set(0, 0, 0);
+      // Contact shadow disc under cable
+      const shadowGeo = new THREE.PlaneGeometry(100, 12);
+      shadowGeo.rotateX(-Math.PI / 2);
+      const shadowMat = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        transparent: true,
+        opacity: 0.08,
+        depthWrite: false
+      });
+      const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+      shadowPlane.position.y = -4.5;
+      cableGroup.add(shadowPlane);
     }
 
     /* ==========================================================
-       BUILD REALISTIC 3D TRENCH (STRATIFIED SOIL, 2 CABLES)
-       SNiP Trapezoidal Cut (1.2m depth, 0.8m bottom, 1.6m top)
+       BUILD CINEMATIC TRENCH (Displacement, Pebbles, Grass)
        ========================================================== */
     function buildRealisticTrench() {
       trenchGroup.clear();
 
       const soilTex = createSoilTexture();
+      const soilNorm = createSoilNormalMap();
       const sandTex = createSandTexture();
       const tapeTex = createWarningTapeTexture();
 
       const matStrata = new THREE.MeshStandardMaterial({
         map: soilTex,
-        roughness: 0.94,
-        metalness: 0.05
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(0.8, 0.8),
+        roughness: 0.92,
+        metalness: 0.03,
+        envMapIntensity: 0.3
       });
 
       const matTopsoil = new THREE.MeshStandardMaterial({
-        color: 0x543A24,
-        roughness: 0.96
+        color: 0x503828,
+        roughness: 0.95,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(0.5, 0.5),
+        envMapIntensity: 0.2
       });
 
       const matSand = new THREE.MeshStandardMaterial({
         map: sandTex,
-        roughness: 0.88,
-        metalness: 0.02
+        roughness: 0.85,
+        metalness: 0.01,
+        envMapIntensity: 0.2
       });
 
-      const matCable = new THREE.MeshStandardMaterial({
-        color: 0x1E2028,
-        metalness: 0.55,
-        roughness: 0.55
+      const matCable = new THREE.MeshPhysicalMaterial({
+        color: 0x1A1A22,
+        metalness: 0.5,
+        roughness: 0.5,
+        envMapIntensity: 0.6
       });
 
       const matTape = new THREE.MeshStandardMaterial({
         map: tapeTex,
-        roughness: 0.35,
-        side: THREE.DoubleSide
+        roughness: 0.3,
+        side: THREE.DoubleSide,
+        emissive: 0x332200,
+        emissiveIntensity: 0.1
       });
 
       const trenchLen = 80;
-      const depth = 8;        // 1.2 meters scaled
-      const bottomW = 6;      // 0.8 meters scaled
-      const topW = 14;        // 1.6 meters scaled
+      const depth = 8;
+      const bottomW = 6;
+      const topW = 14;
 
-      // Full Ground Cross-Section with Trapezoidal Cut
+      // Trapezoidal cross-section with higher detail
       const shape = new THREE.Shape();
-      shape.moveTo(-32, -depth - 1.5);
-      shape.lineTo(-32, 0);
+      shape.moveTo(-36, -depth - 2);
+      shape.lineTo(-36, 0.5);
       shape.lineTo(-topW / 2, 0);
       shape.lineTo(-bottomW / 2, -depth);
       shape.lineTo(bottomW / 2, -depth);
       shape.lineTo(topW / 2, 0);
-      shape.lineTo(32, 0);
-      shape.lineTo(32, -depth - 1.5);
+      shape.lineTo(36, 0.5);
+      shape.lineTo(36, -depth - 2);
       shape.closePath();
 
-      const extrudeSettings = { depth: trenchLen, bevelEnabled: false };
-      const earthGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      const earthGeo = new THREE.ExtrudeGeometry(shape, { depth: trenchLen, bevelEnabled: false, steps: 1 });
       earthGeo.rotateY(Math.PI / 2);
       earthGeo.translate(-trenchLen / 2, 0, 0);
 
+      // Perturb trench wall vertices for organic look
+      const pos = earthGeo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = pos.getZ(i);
+        // Only perturb wall vertices (inside the trench cut)
+        if (y > -depth - 1 && y < 0.3 && Math.abs(z) > bottomW / 2 - 0.5 && Math.abs(z) < topW / 2 + 2) {
+          const n = fbm(x * 0.08, y * 0.12, 3) * 0.4;
+          pos.setZ(i, z + n);
+          pos.setY(i, y + fbm(x * 0.05 + 100, y * 0.1, 2) * 0.2);
+        }
+      }
+      pos.needsUpdate = true;
+      earthGeo.computeVertexNormals();
+
       const earthMesh = new THREE.Mesh(earthGeo, matStrata);
       earthMesh.receiveShadow = true;
+      earthMesh.castShadow = true;
       trenchGroup.add(earthMesh);
 
-      // Organic Excavated Earth Spoil Mounds (Sculpted ridges, not cones)
-      for (let side of [-1, 1]) {
-        const moundPoints = [];
-        const segs = 40;
+      // Sculpted spoil mounds with organic shape
+      for (const side of [-1, 1]) {
+        const moundPts = [];
+        const segs = 60;
         for (let s = 0; s <= segs; s++) {
           const x = -trenchLen / 2 + (s / segs) * trenchLen;
-          const hVar = Math.sin(s * 0.6) * 0.4 + Math.cos(s * 1.3) * 0.25;
-          moundPoints.push(new THREE.Vector3(x, 1.2 + hVar, side * 11));
+          const h = 1.4 + Math.sin(s * 0.5) * 0.5 + Math.cos(s * 1.7) * 0.3 + fbm(s * 0.3, side * 5, 2) * 0.4;
+          moundPts.push(new THREE.Vector3(x, h, side * 12));
         }
-        const curve = new THREE.CatmullRomCurve3(moundPoints);
-        const moundGeo = new THREE.TubeGeometry(curve, 35, 2.2, 12, false);
-        moundGeo.scale(1, 0.75, 1.2);
-        const moundMesh = new THREE.Mesh(moundGeo, matTopsoil);
-        moundMesh.castShadow = true;
-        moundMesh.receiveShadow = true;
-        trenchGroup.add(moundMesh);
+        const curve = new THREE.CatmullRomCurve3(moundPts);
+        const moundGeo = new THREE.TubeGeometry(curve, 50, 2.6, 16, false);
+        moundGeo.scale(1, 0.65, 1.3);
+
+        // Perturb mound surface
+        const mPos = moundGeo.attributes.position;
+        for (let i = 0; i < mPos.count; i++) {
+          const mx = mPos.getX(i);
+          const my = mPos.getY(i);
+          const mz = mPos.getZ(i);
+          const n = fbm(mx * 0.1, mz * 0.15, 3) * 0.35;
+          mPos.setY(i, my + n);
+        }
+        mPos.needsUpdate = true;
+        moundGeo.computeVertexNormals();
+
+        const mound = new THREE.Mesh(moundGeo, matTopsoil);
+        mound.castShadow = true;
+        mound.receiveShadow = true;
+        trenchGroup.add(mound);
       }
 
-      // Compacted Sand Bedding (Песчаная подушка 100 мм)
+      // Sand bedding
       const sandGeo = new THREE.BoxGeometry(trenchLen, 0.8, bottomW);
       const sandBed = new THREE.Mesh(sandGeo, matSand);
       sandBed.position.set(0, -depth + 0.4, 0);
       sandBed.receiveShadow = true;
       trenchGroup.add(sandBed);
 
-      // Two Parallel МКСБ Cables (Нить 1 и Нить 2 с расстоянием 100 мм)
+      // Scattered pebbles on trench bottom and walls
+      const pebbleGeo = new THREE.SphereGeometry(1, 6, 4);
+      const pebbleMat = new THREE.MeshStandardMaterial({ color: 0x8A7A6A, roughness: 0.9, metalness: 0.05 });
+      for (let i = 0; i < 120; i++) {
+        const pebble = new THREE.Mesh(pebbleGeo, pebbleMat);
+        const px = (Math.random() - 0.5) * trenchLen * 0.9;
+        const pz = (Math.random() - 0.5) * bottomW * 1.4;
+        const py = -depth + 0.3 + Math.random() * 0.5;
+        const scale = 0.08 + Math.random() * 0.2;
+        pebble.position.set(px, py, pz);
+        pebble.scale.set(scale, scale * (0.4 + Math.random() * 0.5), scale * (0.6 + Math.random() * 0.4));
+        pebble.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+        pebble.castShadow = true;
+        trenchGroup.add(pebble);
+      }
+
+      // Pebbles on mound slopes
+      for (let i = 0; i < 80; i++) {
+        const pebble = new THREE.Mesh(pebbleGeo, pebbleMat);
+        const side = Math.random() > 0.5 ? 1 : -1;
+        const px = (Math.random() - 0.5) * trenchLen * 0.8;
+        const pz = side * (9 + Math.random() * 5);
+        const py = 0.2 + Math.random() * 1.5;
+        const scale = 0.06 + Math.random() * 0.15;
+        pebble.position.set(px, py, pz);
+        pebble.scale.set(scale, scale * 0.5, scale * 0.7);
+        pebble.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+        trenchGroup.add(pebble);
+      }
+
+      // Two parallel МКСБ cables
       const cableRadius = 0.72;
       const cGeo = new THREE.CylinderGeometry(cableRadius, cableRadius, trenchLen, 32);
       cGeo.rotateZ(Math.PI / 2);
@@ -2468,225 +2781,442 @@
       const thread1 = new THREE.Mesh(cGeo, matCable);
       thread1.position.set(0, -depth + 1.0, -1.3);
       thread1.castShadow = true;
+      thread1.receiveShadow = true;
       trenchGroup.add(thread1);
 
-      const thread2 = new THREE.Mesh(cGeo, matCable);
+      const thread2 = new THREE.Mesh(cGeo.clone(), matCable);
       thread2.position.set(0, -depth + 1.0, 1.3);
       thread2.castShadow = true;
+      thread2.receiveShadow = true;
       trenchGroup.add(thread2);
 
-      // Yellow Warning Signal Tape with hazard pattern
+      // Warning tape
       const tapeGeo = new THREE.PlaneGeometry(trenchLen, 0.85);
       tapeGeo.rotateX(-Math.PI / 2);
       const tape = new THREE.Mesh(tapeGeo, matTape);
       tape.position.set(0, -depth + 3.2, 0);
       trenchGroup.add(tape);
 
-      // CAD Dimension Callout Tags (Strictly Non-Stacking Positions)
-      const makeTag = (text, pos, isAmber) => {
+      // Grass tufts along brovka (trench edge)
+      const grassMat = new THREE.MeshStandardMaterial({ color: 0x6B8F4A, roughness: 0.9, side: THREE.DoubleSide });
+      const dryGrassMat = new THREE.MeshStandardMaterial({ color: 0x9B8B5A, roughness: 0.9, side: THREE.DoubleSide });
+      for (let i = 0; i < 200; i++) {
+        const side = Math.random() > 0.5 ? 1 : -1;
+        const px = (Math.random() - 0.5) * trenchLen;
+        const pz = side * (topW / 2 + 0.5 + Math.random() * 3);
+        const bladeGeo = new THREE.PlaneGeometry(0.15, 0.6 + Math.random() * 0.8);
+        bladeGeo.translate(0, 0.3 + Math.random() * 0.3, 0);
+        const blade = new THREE.Mesh(bladeGeo, Math.random() > 0.4 ? dryGrassMat : grassMat);
+        blade.position.set(px, 0.2, pz);
+        blade.rotation.y = Math.random() * Math.PI;
+        blade.rotation.z = (Math.random() - 0.5) * 0.3;
+        trenchGroup.add(blade);
+      }
+
+      // Moisture stain on trench bottom
+      const moistGeo = new THREE.PlaneGeometry(trenchLen * 0.6, bottomW * 0.5);
+      moistGeo.rotateX(-Math.PI / 2);
+      const moistMat = new THREE.MeshStandardMaterial({
+        color: 0x3A2A1A,
+        roughness: 0.4,
+        metalness: 0.1,
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false
+      });
+      const moist = new THREE.Mesh(moistGeo, moistMat);
+      moist.position.set(5, -depth + 0.12, 0);
+      trenchGroup.add(moist);
+
+      // CAD labels with better positioning
+      const makeTag = (text, pos, accent) => {
         const c = document.createElement('canvas');
-        c.width = 380; c.height = 80;
+        c.width = 420; c.height = 80;
         const ctx = c.getContext('2d');
-        ctx.fillStyle = '#0F172A';
-        ctx.beginPath();
-        ctx.roundRect(4, 4, 372, 72, 12);
-        ctx.fill();
-        ctx.strokeStyle = isAmber ? '#F59E0B' : '#0284C7';
-        ctx.lineWidth = 4;
+
+        // Semi-transparent glass pill
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.beginPath(); ctx.roundRect(4, 4, 412, 72, 14); ctx.fill();
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 24px JetBrains Mono';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(text, 190, 48);
+        ctx.fillText(text, 210, 48);
 
         const tex = new THREE.CanvasTexture(c);
-        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
         sp.position.copy(pos);
-        sp.scale.set(9.0, 2.0, 1);
+        sp.scale.set(9.5, 2.0, 1);
         trenchGroup.add(sp);
       };
 
-      // Separated Callout Coordinates (Non-Stacking)
-      makeTag('Глубина h = 1.20 м', new THREE.Vector3(-25, 1.8, -14), false);
-      makeTag('Ширина дна b = 0.80 м', new THREE.Vector3(20, -depth + 1.2, 0), false);
-      makeTag('Нить №1 (Основная)', new THREE.Vector3(-10, -depth + 2.5, -6.5), true);
-      makeTag('Нить №2 (Резерв)', new THREE.Vector3(-10, -depth + 2.5, 6.5), true);
-      makeTag('Лента 0.4м над кабелем', new THREE.Vector3(8, -depth + 4.5, 0), false);
+      makeTag('Глубина h = 1.20 м', new THREE.Vector3(25, -2, 18), '#38BDF8');
+      makeTag('Ширина дна b = 0.80 м', new THREE.Vector3(-15, -depth + 0.8, 0), '#38BDF8');
+      makeTag('Сигнальная лента 0.4м', new THREE.Vector3(10, -depth + 4.5, 10), '#FFD600');
+      makeTag('Нить №1 (Основная)', new THREE.Vector3(-25, -depth + 1.5, -8), '#F59E0B');
+      makeTag('Нить №2 (Резерв)', new THREE.Vector3(-25, -depth + 1.5, 8), '#F59E0B');
+
+      // Contact shadow on trench floor
+      const fShadGeo = new THREE.PlaneGeometry(trenchLen, bottomW * 0.9);
+      fShadGeo.rotateX(-Math.PI / 2);
+      const fShadMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.06, depthWrite: false });
+      const fShad = new THREE.Mesh(fShadGeo, fShadMat);
+      fShad.position.set(0, -depth + 0.05, 0);
+      trenchGroup.add(fShad);
     }
 
     /* ==========================================================
-       BUILD RICH 3D GAS PIPELINE & DISMANTLING CORRIDOR (САЦ)
-       No more two lines on white! Real Digital Twin of Corridor.
+       BUILD CINEMATIC TRACK/CORRIDOR (Steppe + Pipeline + Excavator)
        ========================================================== */
     function buildRichTrack() {
       trackGroup.clear();
 
+      const grassTex = createGrassTexture();
+      const soilTex = createSoilTexture(512);
+      const soilNorm = createSoilNormalMap(256);
       const roadTex = createRoadTexture();
-      const soilTex = createSoilTexture();
+      const pipeTex = createPipeTexture();
 
-      // Steppe Ground with Geological Soil
-      const steppeGeo = new THREE.PlaneGeometry(140, 70, 24, 16);
-      steppeGeo.rotateX(-Math.PI / 2);
-      const steppeMat = new THREE.MeshStandardMaterial({
-        map: soilTex,
-        roughness: 0.95
+      // — Terrain with displacement (rolling steppe) —
+      const terrW = 160, terrD = 90;
+      const terrGeo = new THREE.PlaneGeometry(terrW, terrD, 80, 60);
+      terrGeo.rotateX(-Math.PI / 2);
+      const tPos = terrGeo.attributes.position;
+      for (let i = 0; i < tPos.count; i++) {
+        const x = tPos.getX(i);
+        const z = tPos.getZ(i);
+        const h = fbm(x * 0.012, z * 0.015, 4) * 2.5 + Math.sin(x * 0.03) * 0.5;
+        tPos.setY(i, h - 2);
+      }
+      tPos.needsUpdate = true;
+      terrGeo.computeVertexNormals();
+
+      const terrMat = new THREE.MeshStandardMaterial({
+        map: grassTex,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(0.3, 0.3),
+        roughness: 0.92,
+        envMapIntensity: 0.25
       });
-      const steppe = new THREE.Mesh(steppeGeo, steppeMat);
-      steppe.position.y = -2;
-      steppe.receiveShadow = true;
-      trackGroup.add(steppe);
+      const terrain = new THREE.Mesh(terrGeo, terrMat);
+      terrain.receiveShadow = true;
+      trackGroup.add(terrain);
 
-      // Patrol Dirt/Gravel Road (Вдольтрассовый проезд)
-      const roadGeo = new THREE.PlaneGeometry(138, 7);
+      // Flatten path under road and pipeline
+      for (let i = 0; i < tPos.count; i++) {
+        const x = tPos.getX(i);
+        const z = tPos.getZ(i);
+        // Road path
+        if (Math.abs(z + 18) < 5) {
+          const blend = 1 - Math.abs(z + 18) / 5;
+          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.8) + (-2) * blend * 0.8);
+        }
+        // Pipeline path
+        if (Math.abs(z + 9) < 4) {
+          const blend = 1 - Math.abs(z + 9) / 4;
+          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.7) + (-1.5) * blend * 0.7);
+        }
+        // Cable route
+        if (Math.abs(z - 3.5) < 3) {
+          const blend = 1 - Math.abs(z - 3.5) / 3;
+          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.5) + (-2) * blend * 0.5);
+        }
+      }
+      tPos.needsUpdate = true;
+      terrGeo.computeVertexNormals();
+
+      // — Dirt road —
+      const roadGeo = new THREE.PlaneGeometry(150, 8, 1, 1);
       roadGeo.rotateX(-Math.PI / 2);
-      const roadMat = new THREE.MeshStandardMaterial({
-        map: roadTex,
-        roughness: 0.9
-      });
+      const roadMat = new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.88, envMapIntensity: 0.15 });
       const road = new THREE.Mesh(roadGeo, roadMat);
-      road.position.set(0, -1.96, -18);
+      road.position.set(0, -1.94, -18);
       road.receiveShadow = true;
       trackGroup.add(road);
 
-      // Main Gas Pipeline (МГ САЦ-4, d = 1420 мм)
-      const pipeGeo = new THREE.CylinderGeometry(2.2, 2.2, 138, 36);
+      // — Main gas pipeline d=1420mm with pipe texture —
+      const pipeGeo = new THREE.CylinderGeometry(2.2, 2.2, 150, 48, 1, false);
       pipeGeo.rotateZ(Math.PI / 2);
-      const pipeMat = new THREE.MeshStandardMaterial({
-        color: 0x0284C7,
-        metalness: 0.75,
-        roughness: 0.35
+      const pipeMat = new THREE.MeshPhysicalMaterial({
+        map: pipeTex,
+        metalness: 0.65,
+        roughness: 0.4,
+        clearcoat: 0.15,
+        envMapIntensity: 0.8
       });
       const pipe = new THREE.Mesh(pipeGeo, pipeMat);
-      pipe.position.set(0, -0.6, -9);
+      pipe.position.set(0, -0.3, -9);
       pipe.castShadow = true;
+      pipe.receiveShadow = true;
       trackGroup.add(pipe);
 
-      // Pipe Weld Joint Rings (Сварные швы труб через каждые 12 метров)
-      for (let x = -60; x <= 60; x += 12) {
-        const ringGeo = new THREE.TorusGeometry(2.25, 0.08, 8, 24);
-        ringGeo.rotateY(Math.PI / 2);
-        const ring = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({ color: 0x1E293B, metalness: 0.9 }));
-        ring.position.set(x, -0.6, -9);
+      // Pipe supports (concrete saddles)
+      const saddleMat = new THREE.MeshStandardMaterial({ color: 0xC8C0B8, roughness: 0.85 });
+      for (let x = -65; x <= 65; x += 15) {
+        const saddle = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 5.5, 1, 1, 1), saddleMat);
+        saddle.position.set(x, -1.5, -9);
+        saddle.castShadow = true;
+        saddle.receiveShadow = true;
+        trackGroup.add(saddle);
+      }
+
+      // Weld rings
+      const weldMat = new THREE.MeshStandardMaterial({ color: 0x2A2A30, metalness: 0.9, roughness: 0.5 });
+      for (let x = -66; x <= 66; x += 12) {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(2.28, 0.1, 10, 28), weldMat);
+        ring.rotateY(Math.PI / 2);
+        ring.position.set(x, -0.3, -9);
         trackGroup.add(ring);
       }
 
-      // Valve Station (Крановый узел МГ САЦ-4 с обвязкой)
-      const valveGroup = new THREE.Group();
-      valveGroup.position.set(-20, -0.6, -9);
-      
-      const valveAct = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 3.5, 16), new THREE.MeshStandardMaterial({ color: 0xDC2626 }));
-      valveAct.position.y = 2.5;
-      valveGroup.add(valveAct);
-      
-      const wheel = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.15, 8, 24), new THREE.MeshStandardMaterial({ color: 0xFFFFFF, metalness: 0.8 }));
-      wheel.rotateX(Math.PI / 2);
-      wheel.position.y = 4.3;
-      valveGroup.add(wheel);
-      trackGroup.add(valveGroup);
+      // — Valve station —
+      const valveG = new THREE.Group();
+      valveG.position.set(-20, -0.3, -9);
 
-      // THE CABLE ROUTE (КЛС-254) — 3 SECTORS:
-      
-      // Sector 1: Backfilled & Reclaimed 10 km (ПК 981 – ПК 971,5)
-      const s1Geo = new THREE.BoxGeometry(60, 0.35, 1.6);
-      const s1Mat = new THREE.MeshStandardMaterial({ color: 0x059669 });
-      const sec1 = new THREE.Mesh(s1Geo, s1Mat);
-      sec1.position.set(-35, -1.85, 3.5);
-      trackGroup.add(sec1);
+      const valveBody = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 4, 16), new THREE.MeshPhysicalMaterial({ color: 0xCC2222, metalness: 0.7, roughness: 0.35 }));
+      valveBody.position.y = 2.5;
+      valveG.add(valveBody);
 
-      // Milestone 10 km Marker Monument («★ РЕПЕР 10 КМ ДОСТИГНУТ»)
-      const monument = new THREE.Group();
-      monument.position.set(-5, -1.8, 3.5);
-      
-      const obelisk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 4.5, 4), new THREE.MeshStandardMaterial({ color: 0x059669, metalness: 0.4 }));
-      obelisk.position.y = 2.25;
-      monument.add(obelisk);
+      const valveWheel = new THREE.Mesh(new THREE.TorusGeometry(1.3, 0.12, 8, 24), new THREE.MeshPhysicalMaterial({ color: 0xEEEEEE, metalness: 0.85, roughness: 0.2 }));
+      valveWheel.rotateX(Math.PI / 2);
+      valveWheel.position.y = 4.8;
+      valveG.add(valveWheel);
 
-      const flag = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 0.08), new THREE.MeshStandardMaterial({ color: 0x10B981 }));
-      flag.position.set(1.4, 4.0, 0);
-      monument.add(flag);
-      trackGroup.add(monument);
+      // Valve stem
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2, 8), new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 }));
+      stem.position.y = 3.8;
+      valveG.add(stem);
 
-      // Sector 2: Active Working Trench (ПК 971,5 – ПК 966,86)
-      const s2Trench = new THREE.Mesh(new THREE.BoxGeometry(30, 0.9, 1.8), new THREE.MeshStandardMaterial({ color: 0x2A1A0E, roughness: 0.95 }));
-      s2Trench.position.set(10, -2.1, 3.5);
-      trackGroup.add(s2Trench);
+      trackGroup.add(valveG);
 
-      // Excavator Model at Active Front
-      const excGroup = new THREE.Group();
-      excGroup.position.set(24, -1.8, 6.5);
-      
-      const tracks = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.8, 2.5), new THREE.MeshStandardMaterial({ color: 0x1E293B, metalness: 0.6 }));
-      tracks.position.y = 0.4;
-      excGroup.add(tracks);
+      // — Cable route sectors —
+      // Sector 1: Completed (green strip with grass)
+      const s1Mat = new THREE.MeshStandardMaterial({ color: 0x4A8B52, roughness: 0.9 });
+      const s1 = new THREE.Mesh(new THREE.BoxGeometry(60, 0.4, 2.0), s1Mat);
+      s1.position.set(-35, -1.82, 3.5);
+      s1.receiveShadow = true;
+      trackGroup.add(s1);
 
-      const cabin = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.2, 2.2), new THREE.MeshStandardMaterial({ color: 0xF59E0B }));
-      cabin.position.set(0, 1.8, 0);
-      excGroup.add(cabin);
+      // 10km milestone monument
+      const monG = new THREE.Group();
+      monG.position.set(-5, -1.8, 3.5);
+      const obelisk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, 5.0, 6), new THREE.MeshPhysicalMaterial({ color: 0x059669, metalness: 0.4, roughness: 0.5 }));
+      obelisk.position.y = 2.5;
+      monG.add(obelisk);
+      const flagMat = new THREE.MeshStandardMaterial({ color: 0x10B981, emissive: 0x083030, emissiveIntensity: 0.2 });
+      const flag = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.3, 0.1), flagMat);
+      flag.position.set(1.5, 4.5, 0);
+      monG.add(flag);
+      trackGroup.add(monG);
 
-      const boom = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 6.0, 8), new THREE.MeshStandardMaterial({ color: 0xF59E0B }));
-      boom.rotateZ(-Math.PI / 4);
-      boom.position.set(2.5, 3.0, 0);
-      excGroup.add(boom);
-      trackGroup.add(excGroup);
+      // Sector 2: Active trench
+      const s2 = new THREE.Mesh(new THREE.BoxGeometry(30, 1.0, 2.2), new THREE.MeshStandardMaterial({
+        map: soilTex,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(0.5, 0.5),
+        roughness: 0.95
+      }));
+      s2.position.set(10, -2.15, 3.5);
+      s2.receiveShadow = true;
+      trackGroup.add(s2);
 
-      // Cable Drum Reeling Machine (Кабельные барабаны на козлах)
-      const drumGroup = new THREE.Group();
-      drumGroup.position.set(20, -1.8, 1.2);
-      const drum = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 2.0, 16), new THREE.MeshStandardMaterial({ color: 0x8D5B2E, roughness: 0.8 }));
-      drum.rotateX(Math.PI / 2);
-      drum.position.y = 1.6;
-      drumGroup.add(drum);
-      trackGroup.add(drumGroup);
+      // — Detailed excavator —
+      const excG = new THREE.Group();
+      excG.position.set(24, -1.8, 6.5);
 
-      // Sector 3: Future Unexcavated 90 km to ПК 880
-      const s3Geo = new THREE.BoxGeometry(40, 0.15, 0.8);
-      const s3Mat = new THREE.MeshStandardMaterial({ color: 0x64748B, opacity: 0.5, transparent: true });
-      const sec3 = new THREE.Mesh(s3Geo, s3Mat);
-      sec3.position.set(45, -1.95, 3.5);
-      trackGroup.add(sec3);
+      // Track pads
+      const trackMat = new THREE.MeshStandardMaterial({ color: 0x1E2328, metalness: 0.65, roughness: 0.5 });
+      for (const tz of [-1.3, 1.3]) {
+        const trackPad = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.5, 0.9), trackMat);
+        trackPad.position.set(0, 0.25, tz);
+        excG.add(trackPad);
+        // Track wheels
+        for (let wx = -2; wx <= 2; wx += 1) {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 12), trackMat);
+          wheel.rotateX(Math.PI / 2);
+          wheel.position.set(wx, 0.3, tz);
+          excG.add(wheel);
+        }
+        // Drive sprocket
+        const sprocket = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0x333340, metalness: 0.8 }));
+        sprocket.rotateX(Math.PI / 2);
+        sprocket.position.set(2.5, 0.35, tz);
+        excG.add(sprocket);
+      }
 
-      // Picket Milestone Concrete Posts with Clickable Sprites
+      // Upper frame
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0xF5A623, roughness: 0.5, metalness: 0.3 });
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.6, 2.8), frameMat);
+      frame.position.set(-0.3, 0.9, 0);
+      excG.add(frame);
+
+      // Cabin with glass
+      const cabinMat = new THREE.MeshStandardMaterial({ color: 0xF5A623, roughness: 0.45, metalness: 0.3 });
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.0, 2.0, 2.4), cabinMat);
+      cabin.position.set(-1.0, 2.1, 0);
+      excG.add(cabin);
+
+      // Cabin glass
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0x445566,
+        metalness: 0.1,
+        roughness: 0.05,
+        transmission: 0.6,
+        thickness: 0.1,
+        envMapIntensity: 1.5
+      });
+      const glass = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.5, 2.0), glassMat);
+      glass.position.set(-0.0, 2.3, 0);
+      excG.add(glass);
+
+      // Counterweight
+      const cwMat = new THREE.MeshStandardMaterial({ color: 0x2A2A30, metalness: 0.6, roughness: 0.5 });
+      const cw = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.5, 2.6), cwMat);
+      cw.position.set(-2.2, 1.6, 0);
+      excG.add(cw);
+
+      // Boom
+      const boomMat = new THREE.MeshStandardMaterial({ color: 0xF5A623, roughness: 0.45, metalness: 0.3 });
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 6.5), boomMat);
+      boom.rotation.x = -Math.PI / 5;
+      boom.position.set(0.3, 3.8, -2.5);
+      excG.add(boom);
+
+      // Stick (arm)
+      const stick = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 4.5), boomMat);
+      stick.rotation.x = Math.PI / 3;
+      stick.position.set(0.3, 2.5, -5.5);
+      excG.add(stick);
+
+      // Bucket
+      const bucketMat = new THREE.MeshStandardMaterial({ color: 0x3A3A42, metalness: 0.7, roughness: 0.5 });
+      const bucket = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.0, 1.0), bucketMat);
+      bucket.position.set(0.3, 0.3, -7.0);
+      bucket.rotation.x = 0.3;
+      excG.add(bucket);
+
+      // Bucket teeth
+      for (let t = -0.6; t <= 0.6; t += 0.3) {
+        const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.3, 4), new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 }));
+        tooth.position.set(t, -0.2, -7.3);
+        tooth.rotation.x = Math.PI / 2;
+        excG.add(tooth);
+      }
+
+      excG.castShadow = true;
+      excG.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      trackGroup.add(excG);
+
+      // — Cable drum —
+      const drumG = new THREE.Group();
+      drumG.position.set(20, -1.8, 1.5);
+      const drumMat = new THREE.MeshStandardMaterial({ color: 0x7A5A30, roughness: 0.75 });
+      // Drum barrel
+      const drumBarrel = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 1.8, 24), drumMat);
+      drumBarrel.rotateX(Math.PI / 2);
+      drumBarrel.position.y = 1.6;
+      drumG.add(drumBarrel);
+      // Drum flanges
+      for (const fz of [-1.0, 1.0]) {
+        const flange = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.0, 0.15, 24), drumMat);
+        flange.rotateX(Math.PI / 2);
+        flange.position.set(0, 1.6, fz);
+        drumG.add(flange);
+      }
+      // Cable wound on drum
+      const woundMat = new THREE.MeshStandardMaterial({ color: 0x1E1E22, roughness: 0.6, metalness: 0.3 });
+      const wound = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.5, 1.6, 24), woundMat);
+      wound.rotateX(Math.PI / 2);
+      wound.position.y = 1.6;
+      drumG.add(wound);
+      // Axle stand
+      const axleMat = new THREE.MeshStandardMaterial({ color: 0x444450, metalness: 0.7 });
+      for (const az of [-1.4, 1.4]) {
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.8, 0.3), axleMat);
+        leg.position.set(0, 0.8, az);
+        drumG.add(leg);
+      }
+      drumG.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+      trackGroup.add(drumG);
+
+      // Sector 3: Future
+      const s3Mat = new THREE.MeshStandardMaterial({ color: 0x8899AA, opacity: 0.4, transparent: true, roughness: 0.9 });
+      const s3 = new THREE.Mesh(new THREE.BoxGeometry(40, 0.18, 1.0), s3Mat);
+      s3.position.set(45, -1.93, 3.5);
+      trackGroup.add(s3);
+
+      // — Picket posts and labels —
+      const postMat = new THREE.MeshStandardMaterial({ color: 0xD8D0C8, roughness: 0.8 });
       const trackPickets = [
-        { name: 'ПК 981,0 (Старт 2025 г.)', pos: new THREE.Vector3(-60, 0, 3.5) },
-        { name: 'ПК 978,2 (Январь 2026)', pos: new THREE.Vector3(-45, 0, 3.5) },
-        { name: 'ПК 976,0 (Сентябрь 2026)', pos: new THREE.Vector3(-25, 0, 3.5) },
-        { name: '★ РЕПЕР 10 КМ (Окт 2026)', pos: new THREE.Vector3(-5, 0, 3.5) },
-        { name: '◀ ФРОНТ РАБОТ: ПК 966,86', pos: new THREE.Vector3(25, 0, 3.5) }
+        { name: 'ПК 981,0 (Старт 2025)', pos: new THREE.Vector3(-60, 0, 3.5), color: '#0F172A' },
+        { name: 'ПК 978,2 (Январь 2026)', pos: new THREE.Vector3(-45, 0, 3.5), color: '#0F172A' },
+        { name: 'ПК 976,0 (Сентябрь 2026)', pos: new THREE.Vector3(-25, 0, 3.5), color: '#0F172A' },
+        { name: '★ РЕПЕР 10 КМ (Окт 2026)', pos: new THREE.Vector3(-5, 0, 3.5), color: '#059669' },
+        { name: '◀ ФРОНТ ПК 966,86', pos: new THREE.Vector3(25, 0, 3.5), color: '#0284C7' }
       ];
 
-      trackPickets.forEach((p, i) => {
+      trackPickets.forEach((p) => {
         // Concrete post
-        const post = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.4, 0.35), new THREE.MeshStandardMaterial({ color: 0xE2E8F0 }));
-        post.position.set(p.pos.x, -0.7, p.pos.z + 1.6);
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.8, 0.4), postMat);
+        post.position.set(p.pos.x, -0.4, p.pos.z + 2);
+        post.castShadow = true;
         trackGroup.add(post);
 
-        // High-contrast floating badge
+        // Label badge
         const c = document.createElement('canvas');
-        c.width = 380; c.height = 76;
+        c.width = 400; c.height = 80;
         const ctx = c.getContext('2d');
-        ctx.fillStyle = i === 3 ? '#059669' : i === 4 ? '#0284C7' : '#0F172A';
-        ctx.beginPath(); ctx.roundRect(4, 4, 372, 68, 12); ctx.fill();
-        ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke();
-
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.roundRect(4, 4, 392, 72, 14); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 22px JetBrains Mono';
+        ctx.font = 'bold 22px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(p.name, 190, 46);
+        ctx.fillText(p.name, 200, 48);
 
         const tex = new THREE.CanvasTexture(c);
-        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
-        sp.position.set(p.pos.x, 2.8, p.pos.z + 1.6);
-        sp.scale.set(8.5, 1.8, 1);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+        sp.position.set(p.pos.x, 3.0, p.pos.z + 2);
+        sp.scale.set(9.0, 2.0, 1);
         trackGroup.add(sp);
       });
+
+      // Sparse grass tufts on terrain
+      const tGrassMat = new THREE.MeshStandardMaterial({ color: 0x7A9050, roughness: 0.9, side: THREE.DoubleSide });
+      const dGrassMat = new THREE.MeshStandardMaterial({ color: 0xA8955A, roughness: 0.9, side: THREE.DoubleSide });
+      for (let i = 0; i < 400; i++) {
+        const gx = (Math.random() - 0.5) * 140;
+        const gz = (Math.random() - 0.5) * 70;
+        // Skip road, pipe, cable route
+        if (Math.abs(gz + 18) < 5 || Math.abs(gz + 9) < 3 || Math.abs(gz - 3.5) < 2) continue;
+        const gy = fbm(gx * 0.012, gz * 0.015, 4) * 2.5 + Math.sin(gx * 0.03) * 0.5 - 2;
+        const h = 0.4 + Math.random() * 0.8;
+        const blade = new THREE.Mesh(new THREE.PlaneGeometry(0.12, h), Math.random() > 0.5 ? tGrassMat : dGrassMat);
+        blade.position.set(gx, gy + h * 0.4, gz);
+        blade.rotation.y = Math.random() * Math.PI;
+        blade.rotation.z = (Math.random() - 0.5) * 0.25;
+        trackGroup.add(blade);
+      }
+
+      // Contact shadow under main pipe
+      const pipeShadGeo = new THREE.PlaneGeometry(150, 6);
+      pipeShadGeo.rotateX(-Math.PI / 2);
+      const pipeShadMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.06, depthWrite: false });
+      const pipeShadow = new THREE.Mesh(pipeShadGeo, pipeShadMat);
+      pipeShadow.position.set(0, -1.98, -9);
+      trackGroup.add(pipeShadow);
     }
 
     function flyToTrackPicket(idx) {
       const xs = [-60, -45, -25, -5, 25];
       const targetX = xs[Math.min(idx, xs.length - 1)];
-      gsap.to(camera.position, { x: targetX + 15, y: 22, z: 28, duration: 1.0 });
-      controls.target.set(targetX, 0, 0);
+      gsap.to(camera.position, { x: targetX + 20, y: 14, z: 28, duration: 1.2, ease: 'power2.inOut' });
+      controls.target.set(targetX, -2, -2);
     }
 
     buildLongCable();
@@ -2772,22 +3302,24 @@
 
       if (m === 'cable') {
         titleEl.innerText = 'Кабель МКСБ 4×4×1.2 (ГОСТ 15125-92)';
-        if (subEl) subEl.innerText = 'Длина: 90 ед. · 16 медных жил d=1.2 мм · PBR материалы';
+        if (subEl) subEl.innerText = '16 медных жил · 7 слоёв · PBR Physical материалы';
         bExp.style.display = 'flex'; bFlx.style.display = 'flex';
-        gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.9 });
+        gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.9, ease: 'power2.inOut' });
         controls.target.set(0, 0, 0);
       } else if (m === 'trench') {
         titleEl.innerText = 'Двухниточная траншея (1.2м в грунте)';
-        if (subEl) subEl.innerText = 'Глубина h = 1.20 м · Ширина дна b = 0.80 м · 2 нитки кабеля связи';
+        if (subEl) subEl.innerText = 'h=1.20м · b=0.80м · Стратифицированный грунт · Normal map';
         bExp.style.display = 'none'; bFlx.style.display = 'none';
-        gsap.to(camera.position, { x: 26, y: 30, z: 46, duration: 0.9 });
-        controls.target.set(0, -3, 0);
+        // Dramatic low angle — looking down into trench at slight angle
+        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.9, ease: 'power2.inOut' });
+        controls.target.set(0, -5, 0);
       } else if (m === 'track') {
-        titleEl.innerText = '3D-Трасса (МГ САЦ-4 · 880–1134 км)';
-        if (subEl) subEl.innerText = 'Газопровод d=1420мм · КЛС-254 · Репер 10 км достигнут · Фронт ПК 966,86';
+        titleEl.innerText = '3D-Трасса МГ САЦ-4 (880–1134 км)';
+        if (subEl) subEl.innerText = 'Газопровод d=1420мм · КЛС-254 · Репер 10 км · Фронт ПК 966,86';
         bExp.style.display = 'none'; bFlx.style.display = 'none';
-        gsap.to(camera.position, { x: 6, y: 36, z: 52, duration: 0.9 });
-        controls.target.set(0, -1, 0);
+        // Lower wider angle — show excavator and pipeline corridor
+        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.9, ease: 'power2.inOut' });
+        controls.target.set(5, -2, -2);
       }
     }
 
@@ -2797,20 +3329,38 @@
 
     /* Camera Presets */
     document.getElementById('cam-iso').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8 });
-      controls.target.set(0, currentMode === 'trench' ? -3 : 0, 0);
+      if (currentMode === 'trench') {
+        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -5, 0);
+      } else if (currentMode === 'track') {
+        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(5, -2, -2);
+      } else {
+        gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, 0, 0);
+      }
     });
     document.getElementById('cam-front').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 55, y: 0, z: 0, duration: 0.8 });
-      controls.target.set(0, currentMode === 'trench' ? -3 : 0, 0);
+      if (currentMode === 'trench') {
+        gsap.to(camera.position, { x: 50, y: -3, z: 0, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -5, 0);
+      } else {
+        gsap.to(camera.position, { x: 55, y: 0, z: 0, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, 0, 0);
+      }
     });
     document.getElementById('cam-side').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 0, y: 0, z: 55, duration: 0.8 });
-      controls.target.set(0, currentMode === 'trench' ? -3 : 0, 0);
+      if (currentMode === 'trench') {
+        gsap.to(camera.position, { x: 0, y: -2, z: 30, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -5, 0);
+      } else {
+        gsap.to(camera.position, { x: 0, y: 2, z: 55, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, currentMode === 'track' ? -2 : 0, 0);
+      }
     });
     document.getElementById('cam-top').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 0, y: 65, z: 0.1, duration: 0.8 });
-      controls.target.set(0, currentMode === 'trench' ? -3 : 0, 0);
+      gsap.to(camera.position, { x: 0, y: 65, z: 0.1, duration: 0.8, ease: 'power2.inOut' });
+      controls.target.set(0, currentMode === 'trench' ? -5 : currentMode === 'track' ? -2 : 0, 0);
     });
 
     /* Controls: Explode, Flex, Rotate, XRay, Reset */
@@ -2828,13 +3378,13 @@
     document.getElementById('btn-flex').addEventListener('click', () => {
       isCurved = !isCurved;
       document.getElementById('btn-flex').classList.toggle('active', isCurved);
-      gsap.to(cableGroup.rotation, { y: isCurved ? 0.35 : 0, z: isCurved ? -0.15 : 0, duration: 1.0 });
+      gsap.to(cableGroup.rotation, { y: isCurved ? 0.35 : 0, z: isCurved ? -0.15 : 0, duration: 1.0, ease: 'power2.inOut' });
     });
 
     document.getElementById('btn-rotate').addEventListener('click', () => {
       isAutoRot = !isAutoRot;
       controls.autoRotate = isAutoRot;
-      controls.autoRotateSpeed = 2.0;
+      controls.autoRotateSpeed = 1.5;
       document.getElementById('btn-rotate').classList.toggle('active', isAutoRot);
     });
 
@@ -2845,8 +3395,16 @@
     });
 
     document.getElementById('btn-reset').addEventListener('click', () => {
-      gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8 });
-      controls.target.set(0, 0, 0);
+      if (currentMode === 'cable') {
+        gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, 0, 0);
+      } else if (currentMode === 'trench') {
+        gsap.to(camera.position, { x: 30, y: 6, z: 22, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(0, -5, 0);
+      } else {
+        gsap.to(camera.position, { x: 15, y: 18, z: 38, duration: 0.8, ease: 'power2.inOut' });
+        controls.target.set(5, -2, -2);
+      }
     });
 
     /* Raycasting for Layer Inspection */
