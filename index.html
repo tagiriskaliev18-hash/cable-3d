@@ -901,6 +901,41 @@
       transform: translateY(-1px);
     }
 
+    /* Fullscreen / Maximized 3D Viewer Mode */
+    .viewport-card.is-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 99999 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      padding: 14px 20px !important;
+      background: var(--bg-canvas) !important;
+      box-shadow: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    body.dark-theme .viewport-card.is-fullscreen {
+      background: #090A10 !important;
+    }
+
+    .viewport-card.is-fullscreen .canvas-frame {
+      flex: 1 !important;
+      height: calc(100vh - 105px) !important;
+      min-height: calc(100vh - 105px) !important;
+      border-radius: 16px !important;
+    }
+
+    .btn-fullscreen-toggle.active {
+      background: #0284C7;
+      color: #FFFFFF;
+      border-color: #0284C7;
+    }
+
     /* 3D Canvas Frame */
     .canvas-frame {
       width: 100%;
@@ -1476,17 +1511,17 @@
                 Суточная динамика демонтажа и репер 10 км
                 <span class="brand-tag-ica" id="chart-tag-range" style="font-size: 11px;">ПК 971,5 – 966,86</span>
               </div>
-              <div class="chart-sub-title">
-                Участок ПК 971,5 – 966,86 (4.64 км) · Джангалинское ЛПУ · САЦ-4
+              <div class="chart-sub-title" id="chart-sub-title">
+                Участок ПК 971,5 – 966,86 (4.64 км) · Ноябрь 2026 (1–17) · Джангалинское ЛПУ · САЦ-4
               </div>
             </div>
             
             <!-- Direct Color Pills Legend attached to the Chart -->
             <div class="chart-legend-pills">
-              <span class="c-pill amber"><span class="c-dot"></span>Вскрыто: 14 170 м</span>
-              <span class="c-pill blue"><span class="c-dot"></span>Демонтаж (2 нитки): 28 340 м</span>
-              <span class="c-pill purple"><span class="c-dot"></span>Засыпка: 12 975 м</span>
-              <span class="c-pill emerald"><span class="c-dot"></span>★ Репер 10 км достигнут</span>
+              <span class="c-pill amber" id="lbl-dug-total"><span class="c-dot"></span>Вскрыто: 4 640 м</span>
+              <span class="c-pill blue" id="lbl-cab-total"><span class="c-dot"></span>Демонтаж (2 нитки): 9 280 м</span>
+              <span class="c-pill purple" id="lbl-back-total"><span class="c-dot"></span>Засыпка: 3 445 м</span>
+              <span class="c-pill emerald" id="lbl-status-badge"><span class="c-dot"></span>★ Репер 10 км достигнут</span>
             </div>
           </div>
 
@@ -1556,6 +1591,10 @@
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
               <span id="cam-lbl-4">Сверху</span>
             </button>
+            <button class="cam-icon-btn btn-fullscreen-toggle" id="btn-expand-3d" title="Развернуть 3D-модель на весь экран (Esc для выхода)">
+              <svg viewBox="0 0 24 24" id="btn-expand-icon"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span id="btn-expand-txt">Во весь экран</span>
+            </button>
           </div>
         </div>
 
@@ -1592,6 +1631,10 @@
             <button class="vctl-btn" id="btn-reset">
               <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
               Сброс
+            </button>
+            <button class="vctl-btn" id="btn-fullscreen-hud" title="Развернуть на весь экран (Esc)">
+              <svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              <span id="btn-fshud-txt">На весь экран</span>
             </button>
           </div>
 
@@ -1756,28 +1799,106 @@
       backM: 12975,
       transM: 28340,
       segments: [
-        { km: 'ПК 981 – 978,2', dug: 2790, cable: 5580, back: 2790, per: '2025 год', stat: 'done' },
-        { km: 'ПК 978,2 – 977,0', dug: 930, cable: 1860, back: 930, per: 'Янв 2026', stat: 'done' },
-        { km: 'ПК 977,3 – 976,0', dug: 1315, cable: 2630, back: 1315, per: 'Сент 2026', stat: 'done' },
-        { km: 'ПК 976,0 – 971,5', dug: 4495, cable: 8990, back: 4495, per: 'Окт 2026', stat: 'done' },
-        { km: 'ПК 971,5 – 966,86', dug: 4640, cable: 9280, back: 3445, per: 'Ноя 2026 (1–17)', stat: 'work' }
-      ],
-      dailyNov: [
-        { d: '01.11', dug: 330, cable: 660, back: 270, cumDug: 330, cumCab: 660 },
-        { d: '02.11', dug: 320, cable: 640, back: 0, cumDug: 650, cumCab: 1300 },
-        { d: '03.11', dug: 150, cable: 300, back: 15, cumDug: 800, cumCab: 1600 },
-        { d: '04.11', dug: 290, cable: 580, back: 260, cumDug: 1090, cumCab: 2180 },
-        { d: '05.11', dug: 300, cable: 600, back: 390, cumDug: 1390, cumCab: 2780 },
-        { d: '06.11', dug: 310, cable: 620, back: 190, cumDug: 1700, cumCab: 3400 },
-        { d: '09.11', dug: 140, cable: 280, back: 100, cumDug: 1840, cumCab: 3680 },
-        { d: '10.11', dug: 400, cable: 800, back: 240, cumDug: 2240, cumCab: 4480 },
-        { d: '11.11', dug: 400, cable: 800, back: 220, cumDug: 2640, cumCab: 5280 },
-        { d: '12.11', dug: 400, cable: 800, back: 230, cumDug: 3040, cumCab: 6080 },
-        { d: '13.11', dug: 400, cable: 800, back: 200, cumDug: 3440, cumCab: 6880 },
-        { d: '14.11', dug: 200, cable: 400, back: 120, cumDug: 3640, cumCab: 7280 },
-        { d: '15.11', dug: 100, cable: 200, back: 490, cumDug: 3740, cumCab: 7480 },
-        { d: '16.11', dug: 400, cable: 800, back: 360, cumDug: 4140, cumCab: 8280 },
-        { d: '17.11', dug: 500, cable: 1000, back: 360, cumDug: 4640, cumCab: 9280 }
+        {
+          km: 'ПК 981 – 978,2',
+          dug: 2790,
+          cable: 5580,
+          back: 2790,
+          per: '2025 год',
+          stat: 'done',
+          note: 'Стартовый участок демонтажа (2.79 км)',
+          daily: [
+            { d: '10.12', dug: 350, cable: 700, back: 300, cumDug: 350, cumCab: 700 },
+            { d: '12.12', dug: 360, cable: 720, back: 340, cumDug: 710, cumCab: 1420 },
+            { d: '15.12', dug: 380, cable: 760, back: 360, cumDug: 1090, cumCab: 2180 },
+            { d: '18.12', dug: 340, cable: 680, back: 350, cumDug: 1430, cumCab: 2860 },
+            { d: '22.12', dug: 350, cable: 700, back: 360, cumDug: 1780, cumCab: 3560 },
+            { d: '25.12', dug: 350, cable: 700, back: 360, cumDug: 2130, cumCab: 4260 },
+            { d: '28.12', dug: 340, cable: 680, back: 360, cumDug: 2470, cumCab: 4940 },
+            { d: '30.12', dug: 320, cable: 640, back: 360, cumDug: 2790, cumCab: 5580 }
+          ]
+        },
+        {
+          km: 'ПК 978,2 – 977,0',
+          dug: 930,
+          cable: 1860,
+          back: 930,
+          per: 'Янв 2026',
+          stat: 'done',
+          note: 'Зимний этап демонтажа (0.93 км)',
+          daily: [
+            { d: '14.01', dug: 240, cable: 480, back: 220, cumDug: 240, cumCab: 480 },
+            { d: '19.01', dug: 250, cable: 500, back: 250, cumDug: 490, cumCab: 980 },
+            { d: '23.01', dug: 220, cable: 440, back: 230, cumDug: 710, cumCab: 1420 },
+            { d: '28.01', dug: 220, cable: 440, back: 230, cumDug: 930, cumCab: 1860 }
+          ]
+        },
+        {
+          km: 'ПК 977,3 – 976,0',
+          dug: 1315,
+          cable: 2630,
+          back: 1315,
+          per: 'Сент 2026',
+          stat: 'done',
+          note: 'Осенний этап демонтажа (1.315 км)',
+          daily: [
+            { d: '10.09', dug: 210, cable: 420, back: 200, cumDug: 210, cumCab: 420 },
+            { d: '14.09', dug: 225, cable: 450, back: 215, cumDug: 435, cumCab: 870 },
+            { d: '18.09', dug: 230, cable: 460, back: 230, cumDug: 665, cumCab: 1330 },
+            { d: '22.09', dug: 210, cable: 420, back: 210, cumDug: 875, cumCab: 1750 },
+            { d: '25.09', dug: 220, cable: 440, back: 230, cumDug: 1095, cumCab: 2190 },
+            { d: '29.09', dug: 220, cable: 440, back: 230, cumDug: 1315, cumCab: 2630 }
+          ]
+        },
+        {
+          km: 'ПК 976,0 – 971,5',
+          dug: 4495,
+          cable: 8990,
+          back: 4495,
+          per: 'Окт 2026',
+          stat: 'done',
+          note: 'Реперный участок 10 км достигнут (4.495 км)',
+          daily: [
+            { d: '02.10', dug: 360, cable: 720, back: 340, cumDug: 360, cumCab: 720 },
+            { d: '05.10', dug: 380, cable: 760, back: 370, cumDug: 740, cumCab: 1480 },
+            { d: '08.10', dug: 375, cable: 750, back: 365, cumDug: 1115, cumCab: 2230 },
+            { d: '10.10', dug: 390, cable: 780, back: 390, cumDug: 1505, cumCab: 3010 },
+            { d: '13.10', dug: 400, cable: 800, back: 400, cumDug: 1905, cumCab: 3810 },
+            { d: '16.10', dug: 380, cable: 760, back: 380, cumDug: 2285, cumCab: 4570 },
+            { d: '19.10', dug: 370, cable: 740, back: 370, cumDug: 2655, cumCab: 5310 },
+            { d: '21.10', dug: 390, cable: 780, back: 390, cumDug: 3045, cumCab: 6090 },
+            { d: '24.10', dug: 360, cable: 720, back: 360, cumDug: 3405, cumCab: 6810 },
+            { d: '27.10', dug: 380, cable: 760, back: 380, cumDug: 3785, cumCab: 7570 },
+            { d: '29.10', dug: 360, cable: 720, back: 380, cumDug: 4145, cumCab: 8290 },
+            { d: '31.10', dug: 350, cable: 700, back: 370, cumDug: 4495, cumCab: 8990 }
+          ]
+        },
+        {
+          km: 'ПК 971,5 – 966,86',
+          dug: 4640,
+          cable: 9280,
+          back: 3445,
+          per: 'Ноя 2026 (1–17)',
+          stat: 'work',
+          note: 'Активный фронт работ (4.64 км)',
+          daily: [
+            { d: '01.11', dug: 330, cable: 660, back: 270, cumDug: 330, cumCab: 660 },
+            { d: '02.11', dug: 320, cable: 640, back: 0, cumDug: 650, cumCab: 1300 },
+            { d: '03.11', dug: 150, cable: 300, back: 15, cumDug: 800, cumCab: 1600 },
+            { d: '04.11', dug: 290, cable: 580, back: 260, cumDug: 1090, cumCab: 2180 },
+            { d: '05.11', dug: 300, cable: 600, back: 390, cumDug: 1390, cumCab: 2780 },
+            { d: '06.11', dug: 310, cable: 620, back: 190, cumDug: 1700, cumCab: 3400 },
+            { d: '09.11', dug: 140, cable: 280, back: 100, cumDug: 1840, cumCab: 3680 },
+            { d: '10.11', dug: 400, cable: 800, back: 240, cumDug: 2240, cumCab: 4480 },
+            { d: '11.11', dug: 400, cable: 800, back: 220, cumDug: 2640, cumCab: 5280 },
+            { d: '12.11', dug: 400, cable: 800, back: 230, cumDug: 3040, cumCab: 6080 },
+            { d: '13.11', dug: 400, cable: 800, back: 200, cumDug: 3440, cumCab: 6880 },
+            { d: '14.11', dug: 200, cable: 400, back: 120, cumDug: 3640, cumCab: 7280 },
+            { d: '15.11', dug: 100, cable: 200, back: 490, cumDug: 3740, cumCab: 7480 },
+            { d: '16.11', dug: 400, cable: 800, back: 360, cumDug: 4140, cumCab: 8280 },
+            { d: '17.11', dug: 500, cable: 1000, back: 360, cumDug: 4640, cumCab: 9280 }
+          ]
+        }
       ]
     };
 
@@ -1863,33 +1984,78 @@
       c.style.display = (c.style.display === 'none') ? 'block' : 'none';
     });
 
-    /* Picket Keycaps Rendering (3D Tactile Buttons) */
+    /* Picket Keycaps Rendering & Dynamic Month Selection */
+    let currentSegmentIdx = 4; // Defaults to active November front
+
+    function selectPicket(idx) {
+      currentSegmentIdx = idx;
+      const s = DATA.segments[idx];
+
+      // Update active picket UI
+      document.querySelectorAll('.picket-cell').forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+      });
+
+      // Update Chart Title & Subtitle for this specific month
+      const tagRange = document.getElementById('chart-tag-range');
+      if (tagRange) tagRange.innerText = s.km;
+
+      const subTitleEl = document.getElementById('chart-sub-title');
+      if (subTitleEl) {
+        subTitleEl.innerText = `Участок ${s.km} (${(s.dug / 1000).toFixed(2)} км) · ${s.per} · Джангалинское ЛПУ · САЦ-4`;
+      }
+
+      // Update Summary Legend Pills directly on the Chart
+      const lblDug = document.getElementById('lbl-dug-total');
+      const lblCab = document.getElementById('lbl-cab-total');
+      const lblBack = document.getElementById('lbl-back-total');
+      const lblBadge = document.getElementById('lbl-status-badge');
+
+      if (lblDug) lblDug.innerHTML = `<span class="c-dot"></span>Вскрыто: ${s.dug.toLocaleString('ru-RU')} м`;
+      if (lblCab) lblCab.innerHTML = `<span class="c-dot"></span>Демонтаж (2 нитки): ${s.cable.toLocaleString('ru-RU')} м`;
+      if (lblBack) lblBack.innerHTML = `<span class="c-dot"></span>Засыпка: ${s.back.toLocaleString('ru-RU')} м`;
+      if (lblBadge) {
+        if (s.stat === 'work') {
+          lblBadge.innerHTML = `<span class="c-dot"></span>● Фронт работ (${(s.dug / 1000).toFixed(2)} км)`;
+        } else {
+          lblBadge.innerHTML = `<span class="c-dot"></span>★ Завершено (${s.per})`;
+        }
+      }
+
+      // Update Mini Inspector Header Bar inside the chart card
+      const insKm = document.getElementById('ins-km');
+      const insPer = document.getElementById('ins-per');
+      const insDug = document.getElementById('ins-dug');
+      const insCab = document.getElementById('ins-cab');
+      const insBack = document.getElementById('ins-back');
+
+      if (insKm) insKm.innerText = s.km;
+      if (insPer) insPer.innerText = s.per;
+      if (insDug) insDug.innerText = `${s.dug.toLocaleString('ru-RU')} м`;
+      if (insCab) insCab.innerText = `${s.cable.toLocaleString('ru-RU')} м`;
+      if (insBack) insBack.innerText = `${s.back.toLocaleString('ru-RU')} м`;
+
+      // REDRAW THE CHART IMMEDIATELY WITH THIS MONTH'S EXACT DATA!
+      drawChart();
+
+      // If track mode is open, fly camera to corresponding 3D picket
+      if (currentMode === 'track') {
+        flyToTrackPicket(idx);
+      }
+    }
+
     function renderPickets() {
       const tape = document.getElementById('picket-tape');
       tape.innerHTML = '';
       DATA.segments.forEach((s, i) => {
         const cell = document.createElement('div');
-        cell.className = `picket-cell ${i === DATA.segments.length - 1 ? 'active' : ''}`;
+        cell.className = `picket-cell ${i === currentSegmentIdx ? 'active' : ''}`;
         cell.innerHTML = `
           <div class="km-lbl">${s.km}</div>
           <div class="per-lbl">${s.per}</div>
           <div class="stat-bar ${s.stat === 'work' ? 'work' : ''}"></div>
         `;
-        cell.addEventListener('click', () => {
-          document.querySelectorAll('.picket-cell').forEach(c => c.classList.remove('active'));
-          cell.classList.add('active');
-          document.getElementById('ins-km').innerText = s.km;
-          document.getElementById('chart-tag-range').innerText = s.km;
-          document.getElementById('ins-per').innerText = s.per;
-          document.getElementById('ins-dug').innerText = `${s.dug.toLocaleString('ru-RU')} м`;
-          document.getElementById('ins-cab').innerText = `${s.cable.toLocaleString('ru-RU')} м`;
-          document.getElementById('ins-back').innerText = `${s.back.toLocaleString('ru-RU')} м`;
-
-          // If track mode is open, fly camera to corresponding picket
-          if (currentMode === 'track') {
-            flyToTrackPicket(i);
-          }
-        });
+        cell.addEventListener('click', () => selectPicket(i));
         tape.appendChild(cell);
       });
     }
@@ -1918,8 +2084,13 @@
       const cw = w - pad.l - pad.r;
       const ch = h - pad.t - pad.b;
 
-      const data = DATA.dailyNov;
-      const maxVal = 1000;
+      // DYNAMICALLY FETCH DATA FOR CURRENTLY SELECTED PICKET / MONTH
+      const currentSegment = DATA.segments[currentSegmentIdx] || DATA.segments[4];
+      const data = currentSegment.daily;
+
+      // Compute dynamic maxVal scaled for this month's data
+      const peakMeters = Math.max(...data.map(d => Math.max(d.dug, d.cable, d.back)));
+      const maxVal = Math.ceil(peakMeters / 200) * 200 || 1000;
       const stepX = cw / data.length;
 
       // Horizontal Gridlines & Values
@@ -1932,7 +2103,8 @@
         ctx.fillStyle = isDark ? '#94A3B8' : '#475569';
         ctx.font = '600 11px JetBrains Mono';
         ctx.textAlign = 'right';
-        ctx.fillText(`${maxVal - i * 200} м`, pad.l - 8, y + 4);
+        const val = Math.round(maxVal - (maxVal / 5) * i);
+        ctx.fillText(`${val} м`, pad.l - 8, y + 4);
       }
 
       // Smooth Spline Area for Cumulative Extraction (Electric Blue Glow)
@@ -1940,10 +2112,12 @@
       gradArea.addColorStop(0, isDark ? 'rgba(56, 189, 248, 0.28)' : 'rgba(2, 132, 199, 0.18)');
       gradArea.addColorStop(1, 'rgba(2, 132, 199, 0.0)');
 
+      const maxCum = Math.max(...data.map(d => d.cumCab || 1)) || 1;
+
       ctx.beginPath();
       data.forEach((d, i) => {
         const x = pad.l + i * stepX + stepX * 0.5;
-        const norm = ((d.cumCab / 9280) * 0.85) * ch;
+        const norm = ((d.cumCab / maxCum) * 0.82) * ch;
         const y = pad.t + ch - norm;
         if (i === 0) {
           ctx.moveTo(x, pad.t + ch);
@@ -2001,12 +2175,12 @@
       ctx.lineWidth = 2.5;
       data.forEach((d, i) => {
         const x = pad.l + i * stepX + stepX * 0.5;
-        const norm = ((d.cumCab / 9280) * 0.85) * ch;
+        const norm = ((d.cumCab / maxCum) * 0.82) * ch;
         const y = pad.t + ch - norm;
         if (i === 0) ctx.moveTo(x, y);
         else {
           const prevX = pad.l + (i - 1) * stepX + stepX * 0.5;
-          const prevNorm = ((data[i-1].cumCab / 9280) * 0.85) * ch;
+          const prevNorm = ((data[i-1].cumCab / maxCum) * 0.82) * ch;
           const prevY = pad.t + ch - prevNorm;
           const cpx = (prevX + x) / 2;
           ctx.bezierCurveTo(cpx, prevY, cpx, y, x, y);
@@ -2043,14 +2217,17 @@
 
       const pad = { t: 25, r: 20, b: 45, l: 55 };
       const cw = rect.width - pad.l - pad.r;
-      const stepX = cw / DATA.dailyNov.length;
+      const curSeg = DATA.segments[currentSegmentIdx] || DATA.segments[4];
+      const curDaily = curSeg.daily;
+      const stepX = cw / curDaily.length;
 
       const idx = Math.floor((mouseX - pad.l) / stepX);
-      if (idx >= 0 && idx < DATA.dailyNov.length) {
+      if (idx >= 0 && idx < curDaily.length) {
         chartHoverIdx = idx;
-        const d = DATA.dailyNov[idx];
+        const d = curDaily[idx];
+        const yr = curSeg.per.includes('2025') ? '2025 г.' : '2026 г.';
         chartTip.innerHTML = `
-          <div style="font-weight:800; color:#38BDF8; margin-bottom:2px;">Дата: ${d.d}.2026 г.</div>
+          <div style="font-weight:800; color:#38BDF8; margin-bottom:2px;">Дата: ${d.d}.${yr} · ${curSeg.km}</div>
           <div>Вскрыто траншеи: <strong style="color:#F59E0B">${d.dug} м</strong></div>
           <div>Демонтировано: <strong style="color:#38BDF8">${d.cable} м (2 нитки)</strong></div>
           <div>Засыпка: <strong style="color:#C084FC">${d.back} м</strong></div>
@@ -2082,100 +2259,363 @@
        High-res Canvas textures + normal maps for realism
        ========================================================== */
 
-    // Simplex-like noise for terrain displacement
-    function noise2D(x, y) {
-      const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-      return (n - Math.floor(n)) * 2 - 1;
-    }
-    function fbm(x, y, oct) {
-      let v = 0, a = 0.5, f = 1;
-      for (let i = 0; i < oct; i++) { v += a * noise2D(x * f, y * f); f *= 2.1; a *= 0.48; }
-      return v;
+    // Smooth Bicubic Value Noise for natural terrain & soil
+    function smoothNoise2D(x, y) {
+      const ix = Math.floor(x), iy = Math.floor(y);
+      const fx = x - ix, fy = y - iy;
+      const ux = fx * fx * (3 - 2 * fx);
+      const uy = fy * fy * (3 - 2 * fy);
+      function hash(i, j) {
+        const n = Math.sin(i * 127.1 + j * 311.7) * 43758.5453123;
+        return (n - Math.floor(n));
+      }
+      const a = hash(ix, iy), b = hash(ix + 1, iy), c = hash(ix, iy + 1), d = hash(ix + 1, iy + 1);
+      return a * (1 - ux) * (1 - uy) + b * ux * (1 - uy) + c * (1 - ux) * uy + d * ux * uy;
     }
 
+    function smoothFbm(x, y, oct = 4) {
+      let val = 0, amp = 0.5, freq = 1;
+      for (let i = 0; i < oct; i++) {
+        val += amp * smoothNoise2D(x * freq, y * freq);
+        freq *= 2.05;
+        amp *= 0.5;
+      }
+      return val;
+    }
+
+    // Fast noise helpers
+    function noise2D(x, y) {
+      return (smoothNoise2D(x, y) - 0.5) * 2;
+    }
+    function fbm(x, y, oct = 4) {
+      return (smoothFbm(x, y, oct) - 0.5) * 2;
+    }
+
+    /* REALISTIC TRENCH SOIL TEXTURE (ZERO STRIPES, NATURAL ORGANIC CLODS & GRAVEL) */
     function createSoilTexture(size = 1024) {
       const cvs = document.createElement('canvas');
       cvs.width = size; cvs.height = size;
       const ctx = cvs.getContext('2d');
 
-      // Rich layered soil base
-      const grad = ctx.createLinearGradient(0, 0, 0, size);
-      grad.addColorStop(0, '#5A3D26');
-      grad.addColorStop(0.3, '#6E4E36');
-      grad.addColorStop(0.6, '#7A5A42');
-      grad.addColorStop(1, '#4A3220');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, size, size);
+      // Base loamy clay with 2D natural variation across X and Y
+      const baseR = 75, baseG = 52, baseB = 34;
+      const imgData = ctx.createImageData(size, size);
+      const data = imgData.data;
 
-      // Geological strata — wavey horizontal bands
-      for (let y = 0; y < size; y += 2) {
-        const shift = Math.sin(y * 0.03) * 20 + Math.sin(y * 0.11 + 2.3) * 10 + Math.cos(y * 0.007) * 40;
-        const tone = Math.sin((y + shift) * 0.012);
-        const alpha = 0.15 + Math.abs(tone) * 0.3;
-        if (tone > 0.2) ctx.fillStyle = `rgba(50, 32, 18, ${alpha})`;
-        else if (tone < -0.2) ctx.fillStyle = `rgba(150, 118, 85, ${alpha * 0.7})`;
-        else ctx.fillStyle = `rgba(100, 72, 48, ${alpha * 0.5})`;
-        ctx.fillRect(0, y, size, 3);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const idx = (y * size + x) * 4;
+          const n1 = smoothFbm(x * 0.007, y * 0.007, 4);
+          const n2 = smoothFbm(x * 0.025 + 30, y * 0.025 + 30, 2);
+          const n3 = (Math.random() - 0.5) * 0.08;
+
+          const tone = n1 * 0.7 + n2 * 0.25 + n3;
+          const r = Math.min(255, Math.max(35, Math.floor(baseR + tone * 65 - 15)));
+          const g = Math.min(255, Math.max(24, Math.floor(baseG + tone * 48 - 10)));
+          const b = Math.min(255, Math.max(14, Math.floor(baseB + tone * 32 - 8)));
+
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Soil Clods (комья земли) — irregular organic clusters with ambient shadow and highlight
+      for (let i = 0; i < 2200; i++) {
+        const cx = Math.random() * size;
+        const cy = Math.random() * size;
+        const cr = 2.5 + Math.random() * 8.5;
+        const stretch = 0.65 + Math.random() * 0.5;
+        const angle = Math.random() * Math.PI;
+
+        // Shadow under clod
+        ctx.fillStyle = 'rgba(20, 11, 6, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 1, cy + cr * 0.4, cr * 1.1, cr * stretch * 0.8, angle, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Clod body
+        const clodTone = 50 + Math.random() * 65;
+        ctx.fillStyle = `rgba(${clodTone + 20}, ${clodTone}, ${clodTone - 15}, 0.85)`;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, cr, cr * stretch, angle, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Warm specular rim catch
+        ctx.fillStyle = 'rgba(160, 125, 90, 0.28)';
+        ctx.beginPath();
+        ctx.ellipse(cx - cr * 0.25, cy - cr * 0.25, cr * 0.45, cr * stretch * 0.45, angle, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // Root-like dark veins
-      ctx.strokeStyle = 'rgba(35, 22, 12, 0.35)';
-      ctx.lineWidth = 1.5;
-      for (let i = 0; i < 40; i++) {
+      // Excavator bucket tooth vertical drag striations (physical digger marks down trench slope)
+      ctx.lineWidth = 1.8;
+      for (let i = 0; i < 35; i++) {
         const sx = Math.random() * size;
-        const sy = Math.random() * size;
+        ctx.strokeStyle = `rgba(32, 18, 10, ${0.12 + Math.random() * 0.15})`;
         ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        let cx = sx, cy = sy;
-        for (let j = 0; j < 8; j++) {
-          cx += (Math.random() - 0.5) * 30;
-          cy += Math.random() * 20 + 5;
-          ctx.lineTo(cx, cy);
+        ctx.moveTo(sx, 0);
+        let cx = sx;
+        for (let y = 0; y < size; y += 40) {
+          cx += (Math.random() - 0.5) * 8;
+          ctx.lineTo(cx, y);
         }
         ctx.stroke();
       }
 
-      // Pebbles and gravel — varying sizes
-      for (let i = 0; i < 6000; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const r = Math.random() * 2.8 + 0.3;
-        const brightness = 40 + Math.random() * 140;
-        ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.78}, ${brightness * 0.56}, ${0.3 + Math.random() * 0.4})`;
+      // Embedded pebbles and rocks of varied minerals
+      for (let i = 0; i < 1500; i++) {
+        const px = Math.random() * size;
+        const py = Math.random() * size;
+        const pr = 1.2 + Math.random() * 3.5;
+        const brightness = 80 + Math.random() * 110;
+        // Shadow
+        ctx.fillStyle = 'rgba(15, 8, 4, 0.5)';
         ctx.beginPath();
-        ctx.ellipse(x, y, r, r * (0.6 + Math.random() * 0.4), Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.arc(px + 1.2, py + 1.2, pr, 0, Math.PI * 2);
+        ctx.fill();
+        // Pebble
+        ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.92}, ${brightness * 0.78}, 0.9)`;
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+        // Highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(px - pr * 0.3, py - pr * 0.3, pr * 0.35, 0, Math.PI * 2);
         ctx.fill();
       }
 
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(3, 3);
+      tex.repeat.set(2, 2);
       tex.anisotropy = 4;
       return tex;
     }
 
+    /* REAL SOBEL NORMAL MAP COMPUTED FROM HEIGHTFIELD */
     function createSoilNormalMap(size = 512) {
       const cvs = document.createElement('canvas');
       cvs.width = size; cvs.height = size;
       const ctx = cvs.getContext('2d');
 
-      ctx.fillStyle = '#8080FF'; // neutral normal
+      // Generate height grid
+      const hGrid = new Float32Array(size * size);
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const n1 = smoothFbm(x * 0.015, y * 0.015, 4);
+          const n2 = smoothFbm(x * 0.05 + 10, y * 0.05 + 10, 2) * 0.4;
+          hGrid[y * size + x] = n1 + n2;
+        }
+      }
+
+      // Add clods and pebbles into heightfield
+      for (let i = 0; i < 900; i++) {
+        const cx = Math.floor(Math.random() * size);
+        const cy = Math.floor(Math.random() * size);
+        const r = 2 + Math.floor(Math.random() * 6);
+        for (let dy = -r; dy <= r; dy++) {
+          for (let dx = -r; dx <= r; dx++) {
+            const distSq = dx * dx + dy * dy;
+            if (distSq <= r * r) {
+              const nx = (cx + dx + size) % size;
+              const ny = (cy + dy + size) % size;
+              const elev = (1 - distSq / (r * r)) * 0.45;
+              hGrid[ny * size + nx] += elev;
+            }
+          }
+        }
+      }
+
+      // Compute Sobel normals
+      const imgData = ctx.createImageData(size, size);
+      const data = imgData.data;
+      const bumpScale = 2.4;
+
+      for (let y = 0; y < size; y++) {
+        const yPrev = (y - 1 + size) % size;
+        const yNext = (y + 1) % size;
+        for (let x = 0; x < size; x++) {
+          const xPrev = (x - 1 + size) % size;
+          const xNext = (x + 1) % size;
+
+          const dx = (hGrid[y * size + xNext] - hGrid[y * size + xPrev]) * bumpScale;
+          const dy = (hGrid[yNext * size + x] - hGrid[yPrev * size + x]) * bumpScale;
+
+          const len = Math.sqrt(dx * dx + dy * dy + 1.0);
+          const nx = -dx / len;
+          const ny = -dy / len;
+          const nz = 1.0 / len;
+
+          const idx = (y * size + x) * 4;
+          data[idx] = Math.floor((nx * 0.5 + 0.5) * 255);
+          data[idx + 1] = Math.floor((ny * 0.5 + 0.5) * 255);
+          data[idx + 2] = Math.floor((nz * 0.5 + 0.5) * 255);
+          data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    /* REALISTIC DRY STEPPE GROUND TEXTURE (WEST KAZAKHSTAN, DZHANAGALA REGION) */
+    function createSteppeTexture(size = 1024) {
+      const cvs = document.createElement('canvas');
+      cvs.width = size; cvs.height = size;
+      const ctx = cvs.getContext('2d');
+
+      // Deep, saturated West Kazakhstan steppe clay base (rich contrast against white sky)
+      ctx.fillStyle = '#6E5535';
       ctx.fillRect(0, 0, size, size);
 
-      // Bump noise
-      for (let y = 0; y < size; y += 2) {
-        for (let x = 0; x < size; x += 2) {
-          const n = fbm(x * 0.015, y * 0.015, 4);
-          const r = Math.floor(128 + n * 40);
-          const g = Math.floor(128 + n * 40);
-          ctx.fillStyle = `rgb(${r},${g},255)`;
-          ctx.fillRect(x, y, 2, 2);
+      // Seamless procedural terrain modulation
+      for (let y = 0; y < size; y += 4) {
+        for (let x = 0; x < size; x += 4) {
+          const n = smoothFbm(x * 0.008, y * 0.008, 3);
+          if (n > 0.55) {
+            ctx.fillStyle = `rgba(155, 130, 85, ${(n - 0.55) * 0.7})`;
+            ctx.fillRect(x, y, 4, 4);
+          } else if (n < 0.45) {
+            ctx.fillStyle = `rgba(70, 50, 28, ${(0.45 - n) * 0.8})`;
+            ctx.fillRect(x, y, 4, 4);
+          }
         }
+      }
+
+      // Organic variation across terrain (alkaline soil & sand patches)
+      for (let y = 0; y < size; y += 4) {
+        for (let x = 0; x < size; x += 4) {
+          const n = smoothFbm(x * 0.005, y * 0.005, 3);
+          if (n > 0.6) {
+            ctx.fillStyle = `rgba(195, 185, 160, ${(n - 0.6) * 0.6})`;
+            ctx.fillRect(x, y, 4, 4);
+          } else if (n < 0.4) {
+            ctx.fillStyle = `rgba(110, 88, 55, ${(0.4 - n) * 0.7})`;
+            ctx.fillRect(x, y, 4, 4);
+          }
+        }
+      }
+
+      // Clumps of Artemisia (steppe sagebrush / полынь) — silvery olive-green
+      for (let i = 0; i < 900; i++) {
+        const bx = Math.random() * size;
+        const by = Math.random() * size;
+        const br = 4 + Math.random() * 14;
+        const isGreen = Math.random() > 0.4;
+        const sageR = isGreen ? 105 : 145;
+        const sageG = isGreen ? 125 : 135;
+        const sageB = isGreen ? 80 : 95;
+        ctx.fillStyle = `rgba(${sageR}, ${sageG}, ${sageB}, ${0.35 + Math.random() * 0.35})`;
+        ctx.beginPath();
+        ctx.ellipse(bx, by, br, br * (0.6 + Math.random() * 0.4), Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Sun-bleached dry steppe grass tufts (ковыль, типчак)
+      for (let i = 0; i < 5000; i++) {
+        const gx = Math.random() * size;
+        const gy = Math.random() * size;
+        const gh = 6 + Math.random() * 16;
+        ctx.strokeStyle = Math.random() > 0.5 ? 'rgba(215, 205, 165, 0.55)' : 'rgba(165, 150, 110, 0.45)';
+        ctx.lineWidth = 0.8 + Math.random() * 0.7;
+        ctx.beginPath();
+        ctx.moveTo(gx, gy);
+        ctx.quadraticCurveTo(gx + (Math.random() - 0.5) * 8, gy - gh * 0.5, gx + (Math.random() - 0.5) * 6, gy - gh);
+        ctx.stroke();
+      }
+
+      // Fine steppe gravel & stones
+      for (let i = 0; i < 2500; i++) {
+        const sx = Math.random() * size;
+        const sy = Math.random() * size;
+        const sr = 0.8 + Math.random() * 2.2;
+        const sb = 120 + Math.random() * 80;
+        ctx.fillStyle = `rgba(${sb}, ${sb * 0.95}, ${sb * 0.82}, 0.7)`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(3, 3);
+      tex.repeat.set(6, 4);
+      tex.anisotropy = 4;
+      return tex;
+    }
+
+    // Grass texture alias for backwards compatibility
+    function createGrassTexture() {
+      return createSteppeTexture(1024);
+    }
+
+    /* TRENCH FRONT SLICE TEXTURE (ORGANIC GEOLOGICAL LOAM, NO STRIPES) */
+    function createTrenchSliceTexture(size = 1024) {
+      const cvs = document.createElement('canvas');
+      cvs.width = size; cvs.height = size;
+      const ctx = cvs.getContext('2d');
+
+      // Smooth, rich continuous gradient: topsoil loam (#3D2719) -> sandy clay (#5C3D26) -> dense subsoil (#754F30)
+      const grad = ctx.createLinearGradient(0, 0, 0, size);
+      grad.addColorStop(0.0, '#362215');
+      grad.addColorStop(0.2, '#482F1D');
+      grad.addColorStop(0.5, '#5A3B25');
+      grad.addColorStop(0.8, '#6A472E');
+      grad.addColorStop(1.0, '#7A5235');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+
+      // Multi-frequency organic 2D noise modulation (breaks all horizontal banding)
+      for (let y = 0; y < size; y += 4) {
+        for (let x = 0; x < size; x += 4) {
+          const n = smoothFbm(x * 0.012, y * 0.012, 3);
+          const n2 = smoothFbm(x * 0.035, y * 0.04, 2);
+          const blend = (n - 0.5) * 0.4 + (n2 - 0.5) * 0.25;
+          if (blend > 0) {
+            ctx.fillStyle = `rgba(135, 95, 60, ${blend * 0.65})`;
+            ctx.fillRect(x, y, 4, 4);
+          } else {
+            ctx.fillStyle = `rgba(35, 20, 12, ${Math.abs(blend) * 0.75})`;
+            ctx.fillRect(x, y, 4, 4);
+          }
+        }
+      }
+
+      // Add organic clods and vertical rootlets in upper zone
+      for (let i = 0; i < 40; i++) {
+        const rx = Math.random() * size;
+        const ry = Math.random() * (size * 0.25);
+        ctx.strokeStyle = 'rgba(25, 15, 8, 0.4)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        let cx = rx, cy = ry;
+        for (let s = 0; s < 6; s++) {
+          cx += (Math.random() - 0.5) * 12;
+          cy += 8 + Math.random() * 10;
+          ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+      }
+
+      // Mineral inclusions throughout depth
+      for (let i = 0; i < 600; i++) {
+        const px = Math.random() * size;
+        const py = Math.random() * size;
+        const pr = 1.5 + Math.random() * 3.5;
+        ctx.fillStyle = 'rgba(190, 180, 160, 0.6)';
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.ClampToEdgeWrapping; tex.wrapT = THREE.ClampToEdgeWrapping;
       return tex;
     }
 
@@ -2201,67 +2641,6 @@
       const tex = new THREE.CanvasTexture(cvs);
       tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
       tex.repeat.set(4, 4);
-      return tex;
-    }
-
-    function createWarningTapeTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 1024; cvs.height = 128;
-      const ctx = cvs.getContext('2d');
-
-      ctx.fillStyle = '#FFD600';
-      ctx.fillRect(0, 0, 1024, 128);
-
-      ctx.fillStyle = '#1A1A1A';
-      for (let x = -32; x < 1024 + 128; x += 100) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0); ctx.lineTo(x + 42, 0);
-        ctx.lineTo(x + 10, 128); ctx.lineTo(x - 32, 128);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      ctx.fillStyle = '#000000';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('⚠ ОСТОРОЖНО! КАБЕЛЬ СВЯЗИ · QAZAQGAZ', 512, 78);
-
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.repeat.set(4, 1);
-      return tex;
-    }
-
-    function createGrassTexture() {
-      const cvs = document.createElement('canvas');
-      cvs.width = 512; cvs.height = 512;
-      const ctx = cvs.getContext('2d');
-
-      // Dry steppe base
-      const grad = ctx.createLinearGradient(0, 0, 512, 512);
-      grad.addColorStop(0, '#8B7355');
-      grad.addColorStop(0.5, '#9B8565');
-      grad.addColorStop(1, '#7A6345');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 512, 512);
-
-      // Sparse dry grass blades
-      for (let i = 0; i < 2000; i++) {
-        const x = Math.random() * 512;
-        const y = Math.random() * 512;
-        const h = 4 + Math.random() * 12;
-        const isGreen = Math.random() > 0.7;
-        ctx.strokeStyle = isGreen ? `rgba(80, 110, 50, ${0.4 + Math.random() * 0.3})` : `rgba(140, 120, 70, ${0.3 + Math.random() * 0.4})`;
-        ctx.lineWidth = 0.5 + Math.random();
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(x + (Math.random() - 0.5) * 6, y - h * 0.6, x + (Math.random() - 0.5) * 4, y - h);
-        ctx.stroke();
-      }
-
-      const tex = new THREE.CanvasTexture(cvs);
-      tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(6, 6);
       return tex;
     }
 
@@ -2437,8 +2816,8 @@
     const amb = new THREE.AmbientLight(0xFFF8F0, 0.4);
     scene.add(amb);
 
-    // Key sunlight (warm golden hour)
-    const sun = new THREE.DirectionalLight(0xFFF5E0, 2.5);
+    // Key sunlight (balanced so terrain colors retain rich contrast)
+    const sun = new THREE.DirectionalLight(0xFFF5E0, 1.8);
     sun.position.set(50, 70, 45);
     sun.castShadow = true;
     sun.shadow.mapSize.width = 2048;
@@ -2648,45 +3027,50 @@
       const soilTex = createSoilTexture();
       const soilNorm = createSoilNormalMap();
       const sandTex = createSandTexture();
-      const tapeTex = createWarningTapeTexture();
+      const sliceTex = createTrenchSliceTexture();
+      const steppeTex = createSteppeTexture();
 
-      const matStrata = new THREE.MeshStandardMaterial({
+      // Real excavated soil with rich organic roughness (ZERO stripes!)
+      const matExcavatedSoil = new THREE.MeshStandardMaterial({
         map: soilTex,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(1.2, 1.2),
+        roughness: 0.94,
+        metalness: 0.02,
+        envMapIntensity: 0.2
+      });
+
+      // Front geological profile
+      const matSlice = new THREE.MeshStandardMaterial({
+        map: sliceTex,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(0.6, 0.6),
+        roughness: 0.92,
+        envMapIntensity: 0.2
+      });
+
+      // Top steppe surface
+      const matSteppe = new THREE.MeshStandardMaterial({
+        map: steppeTex,
         normalMap: soilNorm,
         normalScale: new THREE.Vector2(0.8, 0.8),
         roughness: 0.92,
-        metalness: 0.03,
-        envMapIntensity: 0.3
-      });
-
-      const matTopsoil = new THREE.MeshStandardMaterial({
-        color: 0x503828,
-        roughness: 0.95,
-        normalMap: soilNorm,
-        normalScale: new THREE.Vector2(0.5, 0.5),
-        envMapIntensity: 0.2
+        envMapIntensity: 0.22
       });
 
       const matSand = new THREE.MeshStandardMaterial({
         map: sandTex,
-        roughness: 0.85,
+        roughness: 0.88,
         metalness: 0.01,
-        envMapIntensity: 0.2
+        envMapIntensity: 0.18
       });
 
       const matCable = new THREE.MeshPhysicalMaterial({
         color: 0x1A1A22,
         metalness: 0.5,
-        roughness: 0.5,
+        roughness: 0.45,
+        clearcoat: 0.2,
         envMapIntensity: 0.6
-      });
-
-      const matTape = new THREE.MeshStandardMaterial({
-        map: tapeTex,
-        roughness: 0.3,
-        side: THREE.DoubleSide,
-        emissive: 0x332200,
-        emissiveIntensity: 0.1
       });
 
       const trenchLen = 80;
@@ -2716,68 +3100,79 @@
         const x = pos.getX(i);
         const y = pos.getY(i);
         const z = pos.getZ(i);
-        // Only perturb wall vertices (inside the trench cut)
+        // Perturb wall vertices inside trench cut
         if (y > -depth - 1 && y < 0.3 && Math.abs(z) > bottomW / 2 - 0.5 && Math.abs(z) < topW / 2 + 2) {
-          const n = fbm(x * 0.08, y * 0.12, 3) * 0.4;
+          const n = smoothFbm(x * 0.08, y * 0.12, 3) * 0.5;
           pos.setZ(i, z + n);
-          pos.setY(i, y + fbm(x * 0.05 + 100, y * 0.1, 2) * 0.2);
+          pos.setY(i, y + smoothFbm(x * 0.05 + 100, y * 0.1, 2) * 0.25);
         }
       }
       pos.needsUpdate = true;
       earthGeo.computeVertexNormals();
 
-      const earthMesh = new THREE.Mesh(earthGeo, matStrata);
+      // Multi-material: index 0 is front/back slice, index 1 is sides/trench walls
+      const earthMesh = new THREE.Mesh(earthGeo, [matSlice, matExcavatedSoil]);
       earthMesh.receiveShadow = true;
       earthMesh.castShadow = true;
       trenchGroup.add(earthMesh);
 
-      // Sculpted spoil mounds with organic shape
+      // Top ground surface plane to give realistic steppe vegetation on top
+      for (const side of [-1, 1]) {
+        const topGeo = new THREE.PlaneGeometry(trenchLen, 28, 40, 10);
+        topGeo.rotateX(-Math.PI / 2);
+        const tMesh = new THREE.Mesh(topGeo, matSteppe);
+        tMesh.position.set(0, 0.26, side * (topW / 2 + 14));
+        tMesh.receiveShadow = true;
+        trenchGroup.add(tMesh);
+      }
+
+      // Sculpted spoil mounds of freshly excavated clumpy earth (брустверы)
       for (const side of [-1, 1]) {
         const moundPts = [];
         const segs = 60;
         for (let s = 0; s <= segs; s++) {
           const x = -trenchLen / 2 + (s / segs) * trenchLen;
-          const h = 1.4 + Math.sin(s * 0.5) * 0.5 + Math.cos(s * 1.7) * 0.3 + fbm(s * 0.3, side * 5, 2) * 0.4;
-          moundPts.push(new THREE.Vector3(x, h, side * 12));
+          const h = 1.6 + Math.sin(s * 0.45) * 0.5 + Math.cos(s * 1.5) * 0.35 + smoothFbm(s * 0.25, side * 5, 2) * 0.5;
+          moundPts.push(new THREE.Vector3(x, h, side * 12.5));
         }
         const curve = new THREE.CatmullRomCurve3(moundPts);
-        const moundGeo = new THREE.TubeGeometry(curve, 50, 2.6, 16, false);
-        moundGeo.scale(1, 0.65, 1.3);
+        const moundGeo = new THREE.TubeGeometry(curve, 50, 2.8, 16, false);
+        moundGeo.scale(1, 0.68, 1.35);
 
-        // Perturb mound surface
+        // Perturb mound surface with clods
         const mPos = moundGeo.attributes.position;
         for (let i = 0; i < mPos.count; i++) {
           const mx = mPos.getX(i);
           const my = mPos.getY(i);
           const mz = mPos.getZ(i);
-          const n = fbm(mx * 0.1, mz * 0.15, 3) * 0.35;
+          const n = smoothFbm(mx * 0.12, mz * 0.15, 3) * 0.45;
           mPos.setY(i, my + n);
         }
         mPos.needsUpdate = true;
         moundGeo.computeVertexNormals();
 
-        const mound = new THREE.Mesh(moundGeo, matTopsoil);
+        const mound = new THREE.Mesh(moundGeo, matExcavatedSoil);
         mound.castShadow = true;
         mound.receiveShadow = true;
         trenchGroup.add(mound);
       }
 
-      // Sand bedding
+      // Sand bedding (clean fine sand)
       const sandGeo = new THREE.BoxGeometry(trenchLen, 0.8, bottomW);
       const sandBed = new THREE.Mesh(sandGeo, matSand);
       sandBed.position.set(0, -depth + 0.4, 0);
       sandBed.receiveShadow = true;
       trenchGroup.add(sandBed);
 
-      // Scattered pebbles on trench bottom and walls
+      // Embedded rocks & pebbles on trench floor and walls
       const pebbleGeo = new THREE.SphereGeometry(1, 6, 4);
-      const pebbleMat = new THREE.MeshStandardMaterial({ color: 0x8A7A6A, roughness: 0.9, metalness: 0.05 });
-      for (let i = 0; i < 120; i++) {
+      const pebbleMat = new THREE.MeshStandardMaterial({ color: 0x827260, roughness: 0.92, metalness: 0.05 });
+      for (let i = 0; i < 150; i++) {
         const pebble = new THREE.Mesh(pebbleGeo, pebbleMat);
         const px = (Math.random() - 0.5) * trenchLen * 0.9;
         const pz = (Math.random() - 0.5) * bottomW * 1.4;
         const py = -depth + 0.3 + Math.random() * 0.5;
-        const scale = 0.08 + Math.random() * 0.2;
+        const scale = 0.08 + Math.random() * 0.22;
         pebble.position.set(px, py, pz);
         pebble.scale.set(scale, scale * (0.4 + Math.random() * 0.5), scale * (0.6 + Math.random() * 0.4));
         pebble.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
@@ -2785,21 +3180,21 @@
         trenchGroup.add(pebble);
       }
 
-      // Pebbles on mound slopes
-      for (let i = 0; i < 80; i++) {
+      // Pebbles on spoil mound slopes
+      for (let i = 0; i < 110; i++) {
         const pebble = new THREE.Mesh(pebbleGeo, pebbleMat);
         const side = Math.random() > 0.5 ? 1 : -1;
-        const px = (Math.random() - 0.5) * trenchLen * 0.8;
-        const pz = side * (9 + Math.random() * 5);
-        const py = 0.2 + Math.random() * 1.5;
-        const scale = 0.06 + Math.random() * 0.15;
+        const px = (Math.random() - 0.5) * trenchLen * 0.85;
+        const pz = side * (9 + Math.random() * 5.5);
+        const py = 0.3 + Math.random() * 1.6;
+        const scale = 0.07 + Math.random() * 0.18;
         pebble.position.set(px, py, pz);
         pebble.scale.set(scale, scale * 0.5, scale * 0.7);
         pebble.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
         trenchGroup.add(pebble);
       }
 
-      // Two parallel МКСБ cables
+      // Two parallel МКСБ cables resting in sand
       const cableRadius = 0.72;
       const cGeo = new THREE.CylinderGeometry(cableRadius, cableRadius, trenchLen, 32);
       cGeo.rotateZ(Math.PI / 2);
@@ -2816,24 +3211,19 @@
       thread2.receiveShadow = true;
       trenchGroup.add(thread2);
 
-      // Warning tape
-      const tapeGeo = new THREE.PlaneGeometry(trenchLen, 0.85);
-      tapeGeo.rotateX(-Math.PI / 2);
-      const tape = new THREE.Mesh(tapeGeo, matTape);
-      tape.position.set(0, -depth + 3.2, 0);
-      trenchGroup.add(tape);
+      // Warning tape removed per user request: 'сигнальную ленту можно убрать'
 
-      // Grass tufts along brovka (trench edge)
-      const grassMat = new THREE.MeshStandardMaterial({ color: 0x6B8F4A, roughness: 0.9, side: THREE.DoubleSide });
-      const dryGrassMat = new THREE.MeshStandardMaterial({ color: 0x9B8B5A, roughness: 0.9, side: THREE.DoubleSide });
-      for (let i = 0; i < 200; i++) {
+      // Steppe grass tufts along trench lip
+      const grassMat = new THREE.MeshStandardMaterial({ color: 0x6E8548, roughness: 0.9, side: THREE.DoubleSide });
+      const dryGrassMat = new THREE.MeshStandardMaterial({ color: 0xA69864, roughness: 0.9, side: THREE.DoubleSide });
+      for (let i = 0; i < 240; i++) {
         const side = Math.random() > 0.5 ? 1 : -1;
         const px = (Math.random() - 0.5) * trenchLen;
-        const pz = side * (topW / 2 + 0.5 + Math.random() * 3);
-        const bladeGeo = new THREE.PlaneGeometry(0.15, 0.6 + Math.random() * 0.8);
-        bladeGeo.translate(0, 0.3 + Math.random() * 0.3, 0);
+        const pz = side * (topW / 2 + 0.6 + Math.random() * 3.5);
+        const bladeGeo = new THREE.PlaneGeometry(0.16, 0.65 + Math.random() * 0.8);
+        bladeGeo.translate(0, 0.35 + Math.random() * 0.3, 0);
         const blade = new THREE.Mesh(bladeGeo, Math.random() > 0.4 ? dryGrassMat : grassMat);
-        blade.position.set(px, 0.2, pz);
+        blade.position.set(px, 0.25, pz);
         blade.rotation.y = Math.random() * Math.PI;
         blade.rotation.z = (Math.random() - 0.5) * 0.3;
         trenchGroup.add(blade);
@@ -2871,59 +3261,121 @@
     function buildRichTrack() {
       trackGroup.clear();
 
-      const grassTex = createGrassTexture();
-      const soilTex = createSoilTexture(512);
-      const soilNorm = createSoilNormalMap(256);
+      const steppeTex = createSteppeTexture(1024);
+      const soilTex = createSoilTexture(1024);
+      const soilNorm = createSoilNormalMap(512);
       const roadTex = createRoadTexture();
       const pipeTex = createPipeTexture();
 
-      // — Terrain with displacement (rolling steppe) —
+      // — Rolling Steppe Corridor Terrain with physical cable excavation trench —
       const terrW = 160, terrD = 90;
-      const terrGeo = new THREE.PlaneGeometry(terrW, terrD, 80, 60);
+      const terrGeo = new THREE.PlaneGeometry(terrW, terrD, 140, 80);
       terrGeo.rotateX(-Math.PI / 2);
       const tPos = terrGeo.attributes.position;
+
+      // 1. Base rolling steppe micro-topography
       for (let i = 0; i < tPos.count; i++) {
         const x = tPos.getX(i);
         const z = tPos.getZ(i);
-        const h = fbm(x * 0.012, z * 0.015, 4) * 2.5 + Math.sin(x * 0.03) * 0.5;
+        let h = smoothFbm(x * 0.015, z * 0.018, 4) * 2.2 + Math.sin(x * 0.035) * 0.45;
+
+        // 2. Road grade leveling (Z in [-21, -15])
+        if (Math.abs(z + 18) < 4.5) {
+          const b = 1 - Math.abs(z + 18) / 4.5;
+          h = h * (1 - b * 0.85) + (-2.0) * (b * 0.85);
+        }
+
+        // 3. Pipeline berm (raised stone embankment at Z in [-11, -7])
+        if (Math.abs(z + 9) < 3.8) {
+          const b = 1 - Math.abs(z + 9) / 3.8;
+          h = h * (1 - b * 0.6) + (-1.2 + b * 0.6);
+        }
+
+        // 4. REAL PHYSICAL CABLE TRENCH EXCAVATION (Z in [2.6, 4.4])
+        // Trench extends along line up to excavator (x = 24)
+        if (z >= 2.6 && z <= 4.4 && x <= 26) {
+          const tFactor = 1 - Math.abs(z - 3.5) / 0.9;
+          h -= tFactor * 1.6; // Deep physical trench furrow!
+        }
+
+        // 5. FRESH EXCAVATED SPOIL MOUND BESIDE TRENCH (Z in [4.5, 7.0])
+        if (z >= 4.5 && z <= 7.0 && x <= 26) {
+          const mFactor = 1 - Math.abs(z - 5.75) / 1.25;
+          const rough = smoothFbm(x * 0.15, z * 0.2, 2) * 0.35;
+          h += Math.max(0, mFactor * 1.1 + rough); // Raised clumpy spoil mound!
+        }
+
         tPos.setY(i, h - 2);
       }
       tPos.needsUpdate = true;
       terrGeo.computeVertexNormals();
 
       const terrMat = new THREE.MeshStandardMaterial({
-        map: grassTex,
+        map: steppeTex,
         normalMap: soilNorm,
-        normalScale: new THREE.Vector2(0.3, 0.3),
+        normalScale: new THREE.Vector2(0.9, 0.9),
         roughness: 0.92,
-        envMapIntensity: 0.25
+        envMapIntensity: 0.2
       });
       const terrain = new THREE.Mesh(terrGeo, terrMat);
       terrain.receiveShadow = true;
+      terrain.castShadow = true;
       trackGroup.add(terrain);
 
-      // Flatten path under road and pipeline
-      for (let i = 0; i < tPos.count; i++) {
-        const x = tPos.getX(i);
-        const z = tPos.getZ(i);
-        // Road path
-        if (Math.abs(z + 18) < 5) {
-          const blend = 1 - Math.abs(z + 18) / 5;
-          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.8) + (-2) * blend * 0.8);
-        }
-        // Pipeline path
-        if (Math.abs(z + 9) < 4) {
-          const blend = 1 - Math.abs(z + 9) / 4;
-          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.7) + (-1.5) * blend * 0.7);
-        }
-        // Cable route
-        if (Math.abs(z - 3.5) < 3) {
-          const blend = 1 - Math.abs(z - 3.5) / 3;
-          tPos.setY(i, tPos.getY(i) * (1 - blend * 0.5) + (-2) * blend * 0.5);
-        }
+      // Dedicated dark freshly excavated dirt strip inside the cable trench
+      const trenchDirtMat = new THREE.MeshStandardMaterial({
+        map: soilTex,
+        normalMap: soilNorm,
+        normalScale: new THREE.Vector2(1.2, 1.2),
+        roughness: 0.95,
+        color: 0x483020,
+        envMapIntensity: 0.15
+      });
+      const trenchBedGeo = new THREE.PlaneGeometry(90, 2.2, 30, 2);
+      trenchBedGeo.rotateX(-Math.PI / 2);
+      const trenchBed = new THREE.Mesh(trenchBedGeo, trenchDirtMat);
+      trenchBed.position.set(-19, -3.52, 3.5);
+      trenchBed.receiveShadow = true;
+      trackGroup.add(trenchBed);
+
+      // Spoil mound overlay (dark moist excavated earth pile alongside trench)
+      const moundGeo = new THREE.PlaneGeometry(90, 3.2, 30, 4);
+      moundGeo.rotateX(-Math.PI / 2);
+      const mPos = moundGeo.attributes.position;
+      for (let i = 0; i < mPos.count; i++) {
+        const mx = mPos.getX(i);
+        const mz = mPos.getZ(i);
+        mPos.setY(i, smoothFbm(mx * 0.18, mz * 0.25, 2) * 0.4);
       }
-      tPos.needsUpdate = true;
-      terrGeo.computeVertexNormals();
+      mPos.needsUpdate = true;
+      moundGeo.computeVertexNormals();
+      const moundMesh = new THREE.Mesh(moundGeo, trenchDirtMat);
+      moundMesh.position.set(-19, -1.1, 5.75);
+      moundMesh.castShadow = true;
+      moundMesh.receiveShadow = true;
+      trackGroup.add(moundMesh);
+
+      // Two МКСБ cable lines lying inside the excavated trench
+      const cLineMat = new THREE.MeshPhysicalMaterial({ color: 0x1A1A22, metalness: 0.5, roughness: 0.45 });
+      for (const cz of [3.1, 3.9]) {
+        const cLGeo = new THREE.CylinderGeometry(0.18, 0.18, 88, 16);
+        cLGeo.rotateZ(Math.PI / 2);
+        const cMesh = new THREE.Mesh(cLGeo, cLineMat);
+        cMesh.position.set(-20, -3.35, cz);
+        trackGroup.add(cMesh);
+      }
+
+      // Cable thread emerging from trench and feeding into reel trailer
+      const feedPts = [
+        new THREE.Vector3(18, -3.35, 3.5),
+        new THREE.Vector3(20, -2.4, 2.8),
+        new THREE.Vector3(21.5, -1.2, 2.2),
+        new THREE.Vector3(22.2, -0.2, 1.8)
+      ];
+      const feedCurve = new THREE.CatmullRomCurve3(feedPts);
+      const feedGeo = new THREE.TubeGeometry(feedCurve, 20, 0.16, 12, false);
+      const feedMesh = new THREE.Mesh(feedGeo, cLineMat);
+      trackGroup.add(feedMesh);
 
       // — Dirt road —
       const roadGeo = new THREE.PlaneGeometry(150, 8, 1, 1);
@@ -3227,7 +3679,6 @@
       { name: 'Нить №1 (Основная МКСБ)', anchor: new THREE.Vector3(-12, -8 + 1.0, -1.3), desc: 'Основная кабельная нить КЛС-254 (МКСБ 4×4×1.2 в свинцовой оболочке с броней из стальных лент).', props: { 'Глубина залегания': '1.20 м', 'Марка кабеля': 'МКСБ 4×4×1.2', 'Диаметр': '31.2 мм' } },
       { name: 'Нить №2 (Резервная МКСБ)', anchor: new THREE.Vector3(-12, -8 + 1.0, 1.3), desc: 'Резервная кабельная нить КЛС-254, уложенная параллельно с нормированным расстоянием 100 мм.', props: { 'Расстояние': '100 мм между нитями', 'Назначение': 'Резерв канала связи' } },
       { name: 'Песчаная подушка h = 100 мм', anchor: new THREE.Vector3(12, -8 + 0.4, 0), desc: 'Демпфирующая постель из просеянного песка для защиты свинцовой оболочки и брони от камней.', props: { 'Материал': 'Песок мелкий/средний', 'Толщина': '100 мм' } },
-      { name: 'Сигнальная лента «Осторожно!»', anchor: new THREE.Vector3(10, -8 + 3.2, 0), desc: 'Ярко-желтая полимерная лента с предупредительной надписью, уложенная на 0.4 м выше кабелей.', props: { 'Положение': '0.40 м над кабелем', 'Ширина': '150 мм' } },
       { name: 'Глубина траншеи h = 1.20 м', anchor: new THREE.Vector3(-25, -4.0, -4.5), desc: 'Траншея трапецеидального профиля по СНиП: глубина 1.20 м, ширина дна 0.80 м, по верху 1.60 м.', props: { 'Глубина h': '1.20 м', 'Ширина дна b': '0.80 м', 'Ширина верха B': '1.60 м' } }
     ];
 
@@ -3511,10 +3962,59 @@
       }
     });
 
+    /* Fullscreen 3D Viewport Toggle */
+    function toggleFullscreen3D() {
+      const vpCard = document.querySelector('.viewport-card');
+      const expandBtn = document.getElementById('btn-expand-3d');
+      const hudFsBtn = document.getElementById('btn-fullscreen-hud');
+      const btnTxt = document.getElementById('btn-expand-txt');
+      const hudTxt = document.getElementById('btn-fshud-txt');
+      const icon = document.getElementById('btn-expand-icon');
+
+      const isFs = vpCard.classList.toggle('is-fullscreen');
+
+      if (isFs) {
+        if (expandBtn) expandBtn.classList.add('active');
+        if (btnTxt) btnTxt.innerText = 'Свернуть (Esc)';
+        if (hudTxt) hudTxt.innerText = 'Свернуть';
+        if (icon) icon.innerHTML = '<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>';
+      } else {
+        if (expandBtn) expandBtn.classList.remove('active');
+        if (btnTxt) btnTxt.innerText = 'Во весь экран';
+        if (hudTxt) hudTxt.innerText = 'На весь экран';
+        if (icon) icon.innerHTML = '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>';
+      }
+
+      setTimeout(() => {
+        const w = container.clientWidth, h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+        updateLeaderLines();
+      }, 60);
+    }
+
+    const expandBtnEl = document.getElementById('btn-expand-3d');
+    if (expandBtnEl) expandBtnEl.addEventListener('click', toggleFullscreen3D);
+
+    const hudFsBtnEl = document.getElementById('btn-fullscreen-hud');
+    if (hudFsBtnEl) hudFsBtnEl.addEventListener('click', toggleFullscreen3D);
+
+    // Escape key exits fullscreen
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const vpCard = document.querySelector('.viewport-card');
+        if (vpCard && vpCard.classList.contains('is-fullscreen')) {
+          toggleFullscreen3D();
+        }
+      }
+    });
+
     window.addEventListener('resize', () => {
       const w = container.clientWidth, h = container.clientHeight;
       camera.aspect = w / h; camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      updateLeaderLines();
     });
 
     function animate() {
