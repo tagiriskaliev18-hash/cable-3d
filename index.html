@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>QazaqGaz & ICA · Демонтаж кабеля связи МКСБ 4×4×1.2 (МГ САЦ)</title>
+  
+  <!-- Premium Apple-grade Typography: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Local GSAP with Fallback -->
+  <script src="./vendor/gsap.min.js"></script>
+  <script>
+    if (typeof gsap === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\/script>');
+    }
+  </script>
+  
+  <!-- Three.js Importmap -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/": "./vendor/addons/"
+    }
+  }
+  </script>
+
+  <style>
+    /* ==========================================================
+       APPLE LIQUID GLASS & VISIONOS DESIGN SYSTEM
+       DEFAULT: LIGHT THEME (КРИСТАЛЬНАЯ ЧИТАЕМОСТЬ И СТЕКЛО)
+       ========================================================== */
+    :root {
+      /* Base Canvas */
+      --bg-canvas: #F4F6F9;
+      --bg-canvas-subtle: #EAEFF5;
+      
+      /* Apple Frosted Glass */
+      --glass-surface: rgba(255, 255, 255, 0.76);
+      --glass-surface-elevated: rgba(255, 255, 255, 0.90);
+      --glass-surface-subtle: rgba(255, 255, 255, 0.52);
+      --glass-border: rgba(255, 255, 255, 0.92);
+      --glass-border-hairline: rgba(0, 0, 0, 0.08);
+      --glass-shadow: 0 12px 36px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.03);
+      --glass-shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.04);
+      --glass-shadow-elevated: 0 20px 48px rgba(15, 23, 42, 0.09), 0 4px 12px rgba(15, 23, 42, 0.04);
+      --glass-inner-specular: inset 0 1px 1px rgba(255, 255, 255, 0.95);
+      
+      /* High Contrast Crisp Typography */
+      --text-primary: #0F172A;     /* Slate 900 - Deep, rich ink */
+      --text-secondary: #334155;   /* Slate 700 - Highly distinct */
+      --text-muted: #64748B;       /* Slate 500 - Crisp, clear metadata */
+      --text-on-dark: #FFFFFF;
+      
+      /* Mind & Apple Industrial Accents */
+      --brand-blue: #0284C7;
+      --brand-indigo: #4F46E5;
+      --brand-violet: #7C3AED;
+      --brand-cyan: #06B6D4;
+      --accent-emerald: #059669;
+      --accent-amber: #D97706;
+      --accent-copper: #C25E00;
+      --accent-lead: #64748B;
+      --accent-steel: #475569;
+      
+      /* Fonts & Geometries */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', "SF Mono", Menlo, Consolas, monospace;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    /* DARK THEME (TOGGLED VIA SUN/MOON BUTTON) */
+    body.dark-theme {
+      --bg-canvas: #090A10;
+      --bg-canvas-subtle: #12131C;
+      
+      --glass-surface: rgba(18, 19, 28, 0.78);
+      --glass-surface-elevated: rgba(26, 28, 40, 0.88);
+      --glass-surface-subtle: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-hairline: rgba(255, 255, 255, 0.08);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+      --glass-shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.35);
+      --glass-shadow-elevated: 0 24px 60px rgba(0, 0, 0, 0.6);
+      --glass-inner-specular: inset 0 1px 1px rgba(255, 255, 255, 0.12);
+      
+      --text-primary: #F8FAFC;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      
+      --brand-cyan: #22D3EE;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image: 
+        radial-gradient(ellipse 75% 35% at 50% -5%, rgba(79, 70, 229, 0.08), transparent 70%),
+        radial-gradient(circle 600px at 95% 15%, rgba(6, 182, 212, 0.06), transparent 60%);
+      background-attachment: fixed;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    .tabular { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+    /* Main Container Shell */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      max-width: 1840px;
+      margin: 0 auto;
+      padding: 14px 20px 48px;
+      gap: 14px;
+    }
+
+    /* Common Glass Card Styling */
+    .glass-card {
+      background: var(--glass-surface);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glass-inner-specular);
+      border-radius: var(--radius-lg);
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* ==========================================================
+       1. TOP BAR: CHROME INTERGAS LOGO & ICON CONTROLS
+       ========================================================== */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-radius: var(--radius-lg);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 3D Chrome Metallic Logo Badge */
+    .chrome-logo-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 25%, #94A3B8 50%, #F8FAFC 70%, #64748B 100%);
+      box-shadow: 
+        0 6px 18px rgba(0, 0, 0, 0.12),
+        inset 0 2px 2px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .chrome-logo-badge::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.8) 50%, transparent 60%);
+      transform: rotate(30deg);
+      pointer-events: none;
+      animation: chromeSheen 4.5s infinite;
+    }
+
+    @keyframes chromeSheen {
+      0% { transform: translateX(-120%) rotate(30deg); }
+      30%, 100% { transform: translateX(120%) rotate(30deg); }
+    }
+
+    .chrome-flame-svg {
+      width: 26px;
+      height: 26px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+    }
+
+    .brand-text-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-company {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chrome-text {
+      background: linear-gradient(135deg, #0F172A 0%, #334155 45%, #0284C7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    body.dark-theme .chrome-text {
+      background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 50%, #38BDF8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tag-ica {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(2, 132, 199, 0.12);
+      color: #0284C7;
+      border: 1px solid rgba(2, 132, 199, 0.25);
+    }
+
+    body.dark-theme .brand-tag-ica {
+      background: rgba(34, 211, 238, 0.15);
+      color: #22D3EE;
+      border-color: rgba(34, 211, 238, 0.3);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Icon Toolbar */
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--glass-surface-elevated);
+      border: 1px solid var(--glass-border-hairline);
+      box-shadow: var(--glass-shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .icon-btn:hover {
+      color: var(--text-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+      border-color: rgba(2, 132, 199, 0.35);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.95);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke: currentColor;
+      transition: transform 0.4s ease;
+    }
+
+    /* Sun/Moon Morphing Toggle */
+    #theme-toggle-btn .sun-rays {
+      transform-origin: center;
+      transition: transform 0.4s ease, opacity 0.3s ease;
+    }
+
+    #theme-toggle-btn:hover svg {
+      transform: rotate(25deg);
+    }
+
+    body.dark-theme #theme-toggle-btn:hover svg {
+      transform: rotate(-25deg);
+    }
+
+    /* Tooltip */
+    .has-tip::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: -32px;
+      right: 0;
+      white-space: nowrap;
+      background: var(--text-primary);
+      color: var(--bg-canvas);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .has-tip:hover::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==========================================================
+       2. METRICS STRIP: EXACT VALUES FROM WORKSHEET
+       ========================================================== */
+    .summary-strip {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-strip::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #4F46E5, #0284C7, #059669);
+    }
+
+    .strip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .strip-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .strip-title span {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* Apple Segmented Unit Control */
+    .segmented-control {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border-hairline);
+    }
+
+    body.dark-theme .segmented-control {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .seg-pill {
+      padding: 5px 12px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .seg-pill svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+
+    .seg-pill.active {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    body.dark-theme .seg-pill.active {
+      background: rgba(255, 255, 255, 0.16);
+      color: #FFFFFF;
+    }
+
+    /* KPI Grid */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: var(--glass-surface-subtle);
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      background: var(--glass-surface-elevated);
+      transform: translateY(-1px);
+      box-shadow: var(--glass-shadow-sm);
+    }
+
+    .kpi-card.highlight {
+      border-color: rgba(2, 132, 199, 0.35);
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.06), rgba(79, 70, 229, 0.06));
+    }
+
+    .kpi-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--text-muted);
+    }
+
+    body.dark-theme .kpi-badge {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .kpi-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 4px 0 2px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-unit {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-sub {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-bar {
+      height: 4px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    body.dark-theme .kpi-bar {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .kpi-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #4F46E5, #0284C7);
+    }
+
+    /* ==========================================================
+       3. MAIN SPLIT: THE GRAPH (LEFT) & 3D STUDIO (RIGHT)
+       ========================================================== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1180px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* LEFT: GRAPH WORKSPACE */
+    .graph-card {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: #0284C7;
+      background: rgba(2, 132, 199, 0.1);
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(2, 132, 199, 0.2);
+    }
+
+    /* PICKET CARDS TAPE (10 KM SECTION) */
+    .picket-card-wrap {
+      background: var(--glass-surface-subtle);
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .picket-tape-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.03em;
+    }
+
+    .picket-tape {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .picket-cell {
+      flex: 1;
+      min-width: 86px;
+      background: #FFFFFF;
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: 8px;
+      padding: 8px 6px;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-theme .picket-cell {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .picket-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      border-color: #0284C7;
+    }
+
+    .picket-cell.active {
+      background: #EEF2FF;
+      border-color: #4F46E5;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.18);
+      transform: translateY(-2px);
+    }
+
+    body.dark-theme .picket-cell.active {
+      background: rgba(79, 70, 229, 0.25);
+      border-color: #818CF8;
+    }
+
+    .picket-cell .km-lbl {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--text-primary);
+    }
+
+    .picket-cell .per-lbl {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin: 3px 0 4px;
+    }
+
+    .picket-cell .stat-bar {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--accent-emerald);
+      width: 100%;
+    }
+
+    .picket-cell .stat-bar.work {
+      background: linear-gradient(90deg, #0284C7, #D97706);
+    }
+
+    /* Inspector Bar */
+    .inspect-box {
+      background: #FFFFFF;
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    body.dark-theme .inspect-box {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .insp-col .t {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .insp-col .v {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    /* Canvas Chart Box */
+    .chart-box {
+      background: #FFFFFF;
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    body.dark-theme .chart-box {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .chart-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    #daily-chart {
+      width: 100%;
+      height: 270px;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Floating Chart Tooltip */
+    #chart-tip {
+      position: absolute;
+      background: var(--text-primary);
+      color: var(--bg-canvas);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 50;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+
+    /* ==========================================================
+       4. RIGHT: 3D STUDIO VIEWPORT (LONG CABLE & REALISTIC TRENCH)
+       ========================================================== */
+    .viewport-card {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Viewport Tabs */
+    .v-tabs-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .v-tabs {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border-hairline);
+    }
+
+    body.dark-theme .v-tabs {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .vtab {
+      padding: 6px 14px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .vtab.active {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    body.dark-theme .vtab.active {
+      background: rgba(255, 255, 255, 0.16);
+      color: #FFFFFF;
+    }
+
+    /* Camera Preset Buttons with Icons */
+    .cam-btn-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .cam-icon-btn {
+      padding: 5px 9px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border-hairline);
+      background: #FFFFFF;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.15s ease;
+    }
+
+    body.dark-theme .cam-icon-btn {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+    }
+
+    .cam-icon-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .cam-icon-btn:hover {
+      border-color: #0284C7;
+      color: #0284C7;
+      transform: translateY(-1px);
+    }
+
+    /* 3D Canvas Frame */
+    .canvas-frame {
+      width: 100%;
+      height: 520px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at 50% 40%, #FFFFFF 0%, #E2E8F0 100%);
+      border: 1px solid var(--glass-border-hairline);
+      touch-action: none;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.04);
+      transition: background 0.35s ease;
+    }
+
+    body.dark-theme .canvas-frame {
+      background: radial-gradient(circle at 50% 40%, #151624 0%, #08090E 100%);
+    }
+
+    #webgl-canvas { width: 100%; height: 100%; display: block; }
+    #leader-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+    #labels-container { position: absolute; inset: 0; pointer-events: none; z-index: 11; }
+
+    /* Apple-style Leader Labels */
+    .leader-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.92);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(2, 132, 199, 0.45);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0F172A;
+      pointer-events: auto;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-theme .leader-label {
+      background: rgba(18, 20, 30, 0.92);
+      border-color: rgba(34, 211, 238, 0.4);
+      color: #F8FAFC;
+    }
+
+    .leader-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #0284C7;
+    }
+
+    body.dark-theme .leader-label::before {
+      background: #22D3EE;
+    }
+
+    .leader-label:hover {
+      border-color: #0284C7;
+      transform: translate(-50%, -50%) scale(1.06);
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2);
+    }
+
+    /* Floating Viewport HUD */
+    .vhud-overlay {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .vhud-tag {
+      background: rgba(255, 255, 255, 0.88);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-hairline);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    body.dark-theme .vhud-tag {
+      background: rgba(15, 17, 26, 0.88);
+      color: #38BDF8;
+    }
+
+    /* Floating Tool Controls */
+    .vhud-controls {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 12;
+    }
+
+    .vctl-btn {
+      background: rgba(255, 255, 255, 0.9);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-hairline);
+      color: var(--text-primary);
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.15s ease;
+    }
+
+    body.dark-theme .vctl-btn {
+      background: rgba(18, 20, 30, 0.9);
+      color: #F8FAFC;
+    }
+
+    .vctl-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .vctl-btn:hover {
+      border-color: #0284C7;
+      color: #0284C7;
+      transform: translateY(-1px);
+    }
+
+    .vctl-btn.active {
+      background: #0284C7;
+      color: #FFFFFF;
+      border-color: #0284C7;
+    }
+
+    .vhud-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      background: rgba(255, 255, 255, 0.85);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border-hairline);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    body.dark-theme .vhud-hint {
+      background: rgba(15, 17, 26, 0.85);
+    }
+
+    /* Floating Layer Detail Card */
+    .layer-card {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      width: 290px;
+      background: rgba(255, 255, 255, 0.96);
+      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(24px);
+      border: 1px solid #0284C7;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+      z-index: 25;
+      transform: translateY(15px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.dark-theme .layer-card {
+      background: rgba(18, 20, 30, 0.96);
+      border-color: #38BDF8;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    }
+
+    .layer-card.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .layer-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .layer-card-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0284C7;
+    }
+
+    body.dark-theme .layer-card-title {
+      color: #38BDF8;
+    }
+
+    .layer-card-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .layer-card-props {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+    }
+
+    .lp-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .lp-val {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    /* ==========================================================
+       5. BOTTOM PANEL: PRODUCTION LOG & METALS SUMMARY
+       ========================================================== */
+    .bottom-panel {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .panel-toggle h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metals-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .metal-card {
+      background: var(--glass-surface-subtle);
+      border: 1px solid var(--glass-border-hairline);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .metal-sym {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .metal-sym.cu {
+      background: rgba(194, 94, 0, 0.15);
+      color: #C25E00;
+      border: 1px solid rgba(194, 94, 0, 0.35);
+    }
+
+    .metal-sym.pb {
+      background: rgba(100, 116, 139, 0.15);
+      color: #475569;
+      border: 1px solid rgba(100, 116, 139, 0.35);
+    }
+
+    body.dark-theme .metal-sym.pb {
+      color: #CBD5E1;
+    }
+
+    .metal-sym.fe {
+      background: rgba(71, 85, 105, 0.15);
+      color: #334155;
+      border: 1px solid rgba(71, 85, 105, 0.35);
+    }
+
+    body.dark-theme .metal-sym.fe {
+      color: #94A3B8;
+    }
+
+    .tbl-wrap {
+      overflow-x: auto;
+      margin-top: 6px;
+    }
+
+    .d-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .d-tbl th {
+      background: rgba(0, 0, 0, 0.03);
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      border-bottom: 2px solid var(--glass-border-hairline);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    body.dark-theme .d-tbl th {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .d-tbl td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--glass-border-hairline);
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .d-tbl tr:hover td {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    body.dark-theme .d-tbl tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  </style>
+</head>
+<body class="light-theme">
+
+  <div class="app-shell">
+    
+    <!-- 1. TOP HEADER (CHROME INTERGAS LOGO & ICON CONTROLS) -->
+    <header class="glass-card top-bar">
+      <div class="brand-section">
+        
+        <!-- 3D Chrome Metallic Flame Logo -->
+        <div class="chrome-logo-badge" title="Интергаз Центральная Азия">
+          <svg class="chrome-flame-svg" viewBox="0 0 32 32">
+            <defs>
+              <linearGradient id="chromeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFFFFF" />
+                <stop offset="25%" stop-color="#E2E8F0" />
+                <stop offset="45%" stop-color="#64748B" />
+                <stop offset="70%" stop-color="#F8FAFC" />
+                <stop offset="100%" stop-color="#334155" />
+              </linearGradient>
+            </defs>
+            <!-- Stylized ICA Flame / Gas Swirl Emblem -->
+            <path d="M16 2 C16 2 20 8 20 13 C20 16 18.5 18 16 19 C13.5 18 12 16 12 13 C12 8 16 2 16 2 Z" fill="url(#chromeGrad)" stroke="#FFFFFF" stroke-width="0.8"/>
+            <path d="M16 10 C16 10 24 14 24 21 C24 26 20.4 30 16 30 C11.6 30 8 26 8 21 C8 14 16 10 16 10 Z" fill="none" stroke="url(#chromeGrad)" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="16" cy="22" r="3.2" fill="url(#chromeGrad)"/>
+          </svg>
+        </div>
+
+        <div class="brand-text-wrap">
+          <div class="brand-title-row">
+            <div class="brand-company">
+              <span>QAZAQGAZ</span>
+              <span style="opacity: 0.35;">/</span>
+              <span class="chrome-text">ИНТЕРГАЗ ЦЕНТРАЛЬНАЯ АЗИЯ</span>
+            </div>
+            <span class="brand-tag-ica">МГ САЦ-4</span>
+          </div>
+          <div class="brand-sub">
+            Демонтаж магистрального кабеля связи КЛС-254 (МКСБ 4×4×1,2 в двухниточном исполнении) · Джангалинское ЛПУ (880–1134 км)
+          </div>
+        </div>
+      </div>
+
+      <!-- Icon-Based Tool Bar -->
+      <div class="top-actions">
+        <!-- Sun ☀️ / Moon 🌙 Morphing Toggle -->
+        <button class="icon-btn has-tip" id="theme-toggle-btn" data-tip="Переключить тему">
+          <svg id="theme-icon" viewBox="0 0 24 24">
+            <!-- Sun Group (Light Mode) -->
+            <g id="sun-icon">
+              <circle cx="12" cy="12" r="4.5" fill="#F59E0B" stroke="#F59E0B"/>
+              <g class="sun-rays" stroke="#F59E0B">
+                <line x1="12" y1="2" x2="12" y2="4.5"/>
+                <line x1="12" y1="19.5" x2="12" y2="22"/>
+                <line x1="2" y1="12" x2="4.5" y2="12"/>
+                <line x1="19.5" y1="12" x2="22" y2="12"/>
+                <line x1="4.93" y1="4.93" x2="6.7" y2="6.7"/>
+                <line x1="17.3" y1="17.3" x2="19.07" y2="19.07"/>
+                <line x1="4.93" y1="19.07" x2="6.7" y2="17.3"/>
+                <line x1="17.3" y1="6.7" x2="19.07" y2="4.93"/>
+              </g>
+            </g>
+            <!-- Moon Path (Hidden in Light Mode, shown in Dark Mode) -->
+            <path id="moon-icon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#38BDF8" stroke="#38BDF8" style="display: none;"/>
+          </svg>
+        </button>
+
+        <!-- Print / PDF Report Icon -->
+        <button class="icon-btn has-tip" onclick="window.print()" data-tip="Печать отчета">
+          <svg viewBox="0 0 24 24">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+        </button>
+
+        <!-- Fullscreen Icon -->
+        <button class="icon-btn has-tip" id="btn-fullscreen" data-tip="На весь экран">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. METRICS STRIP: EXACT DATA FROM WORKSHEET -->
+    <section class="glass-card summary-strip">
+      <div class="strip-header">
+        <div class="strip-title">
+          Производственная сводка по трассе газопровода
+          <span>Договор UD6-21-08-6008 · Участок 880–1134 км МГ "САЦ"</span>
+        </div>
+        
+        <!-- Segmented Unit Selector -->
+        <div class="segmented-control">
+          <button class="seg-pill active" id="btn-unit-km">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            Километры (км)
+          </button>
+          <button class="seg-pill" id="btn-unit-m">
+            <svg viewBox="0 0 24 24"><path d="M4 19V5M20 19V5M8 12h8"/></svg>
+            Метры (м)
+          </button>
+          <button class="seg-pill" id="btn-unit-th">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M7 8h10M7 16h10"/></svg>
+            Кабель (2 нитки)
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-row">
+        <!-- К ДЕМОНТАЖУ (104 км по плану) -->
+        <div class="kpi-card highlight">
+          <div class="kpi-head">
+            <span>К демонтажу (план)</span>
+            <span class="kpi-badge">Листок: 104 км</span>
+          </div>
+          <div class="kpi-val tabular">
+            <span id="v-plan">104.0</span>
+            <span class="kpi-unit" id="u-plan">км</span>
+          </div>
+          <div class="kpi-sub">Целевой объем этапа по трассе</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 100%;"></div></div>
+        </div>
+
+        <!-- ДЕМОНТИРОВАНО (10 км репер / 14.17 км факт) -->
+        <div class="kpi-card">
+          <div class="kpi-head">
+            <span>Демонтировано</span>
+            <span class="kpi-badge" style="color: var(--accent-emerald);">Листок: 10 км</span>
+          </div>
+          <div class="kpi-val tabular">
+            <span id="v-dem">14.17</span>
+            <span class="kpi-unit" id="u-dem">км</span>
+          </div>
+          <div class="kpi-sub" style="color: var(--accent-emerald);">✓ Репер 10 км достигнут (факт: 14.17 км)</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 13.6%;"></div></div>
+        </div>
+
+        <!-- ВЫКОПАНО (ЗЕМЛЯНЫЕ РАБОТЫ) -->
+        <div class="kpi-card">
+          <div class="kpi-head">
+            <span>Выкопано (вскрыто)</span>
+            <span class="kpi-badge">Земляные работы</span>
+          </div>
+          <div class="kpi-val tabular">
+            <span id="v-dug">14.17</span>
+            <span class="kpi-unit" id="u-dug">км</span>
+          </div>
+          <div class="kpi-sub">14 170 м траншеи вскрыто экскаватором</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 13.6%; background: var(--accent-amber);"></div></div>
+        </div>
+
+        <!-- ОБРАТНАЯ ЗАСЫПКА -->
+        <div class="kpi-card">
+          <div class="kpi-head">
+            <span>Обратная засыпка</span>
+            <span class="kpi-badge">91.6% от вскрытого</span>
+          </div>
+          <div class="kpi-val tabular">
+            <span id="v-back">12.98</span>
+            <span class="kpi-unit" id="u-back">км</span>
+          </div>
+          <div class="kpi-sub">12 975 м (отставание всего 1 195 м)</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 91.6%; background: #0284C7;"></div></div>
+        </div>
+
+        <!-- ВЫВОЗ КАБЕЛЯ -->
+        <div class="kpi-card">
+          <div class="kpi-head">
+            <span>Вывоз кабеля</span>
+            <span class="kpi-badge">100% вывезено</span>
+          </div>
+          <div class="kpi-val tabular">
+            <span id="v-trans">28.34</span>
+            <span class="kpi-unit" id="u-trans">км ниток</span>
+          </div>
+          <div class="kpi-sub">28 340 м вывезено на базу хранения</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width: 100%; background: var(--accent-emerald);"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. MAIN WORKSPACE: THE GRAPH (LEFT) & 3D STUDIO (RIGHT) -->
+    <main class="main-grid">
+      
+      <!-- LEFT: THE GRAPH (ГРАФИК ДЕМОНТАЖА 10 КМ УЧАСТКА) -->
+      <section class="glass-card graph-card">
+        <div class="card-head">
+          <div class="card-title">
+            График 10 км участка и динамика
+            <span class="card-tag">ПК 981 – 971,5 (10 км) – 966,86</span>
+          </div>
+          <div class="chart-legend">
+            <span><span class="leg-dot" style="background: #F59E0B;"></span> Вскрыто (м)</span>
+            <span><span class="leg-dot" style="background: #0284C7;"></span> Демонтаж 2 нитки (м)</span>
+            <span><span class="leg-dot" style="background: #7C3AED;"></span> Засыпка (м)</span>
+          </div>
+        </div>
+
+        <!-- Picket Tape (10 km Track Breakdown) -->
+        <div class="picket-card-wrap">
+          <div class="picket-tape-head">
+            <span>ЛИНЕЙНЫЙ ПРОФИЛЬ ТРАССЫ (КЛИК ДЛЯ ИНСПЕКЦИИ)</span>
+            <span style="color: #0284C7;">ФРОНТ РАБОТ: ПК 966,86</span>
+          </div>
+          <div class="picket-tape" id="picket-tape"></div>
+        </div>
+
+        <!-- Mini Inspector Box -->
+        <div class="inspect-box">
+          <div class="insp-col">
+            <div class="t">Участок</div>
+            <div class="v" id="ins-km">ПК 971,5 – 966,86 км</div>
+          </div>
+          <div class="insp-col">
+            <div class="t">Период</div>
+            <div class="v" id="ins-per">Ноябрь 2026 г.</div>
+          </div>
+          <div class="insp-col">
+            <div class="t">Вскрыто</div>
+            <div class="v" id="ins-dug">4 640 м</div>
+          </div>
+          <div class="insp-col">
+            <div class="t">Кабель (2 нитки)</div>
+            <div class="v" id="ins-cab">9 280 м</div>
+          </div>
+          <div class="insp-col">
+            <div class="t">Засыпка</div>
+            <div class="v" id="ins-back">3 445 м</div>
+          </div>
+        </div>
+
+        <!-- The Canvas Chart -->
+        <div class="chart-box">
+          <canvas id="daily-chart"></canvas>
+          <div id="chart-tip"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: 3D STUDIO (LONG CABLE & REALISTIC TRENCH) -->
+      <section class="glass-card viewport-card">
+        <div class="v-tabs-row">
+          <div class="v-tabs">
+            <button class="vtab active" id="tab-cable">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+              Кабель МКСБ 4×4×1.2
+            </button>
+            <button class="vtab" id="tab-trench">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M3 21h18M6 21l3-14h6l3 14"/></svg>
+              Двухниточная траншея (1.2м)
+            </button>
+            <button class="vtab" id="tab-track">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M4 19L19 4M10 20l10-10"/></svg>
+              3D-Трасса САЦ
+            </button>
+          </div>
+
+          <!-- Camera Preset Buttons with Icons -->
+          <div class="cam-btn-group">
+            <button class="cam-icon-btn" id="cam-iso" title="Изометрический вид">
+              <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              Изо
+            </button>
+            <button class="cam-icon-btn" id="cam-front" title="Торец (Срез)">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+              Срез
+            </button>
+            <button class="cam-icon-btn" id="cam-side" title="Вид сбоку">
+              <svg viewBox="0 0 24 24"><line x1="2" y1="12" x2="22" y2="12"/><line x1="5" y1="8" x2="19" y2="8"/></svg>
+              Сбоку
+            </button>
+            <button class="cam-icon-btn" id="cam-top" title="Вид сверху (План)">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+              Сверху
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Canvas Frame -->
+        <div class="canvas-frame" id="viewport-box">
+          <canvas id="webgl-canvas"></canvas>
+          <svg id="leader-svg"></svg>
+          <div id="labels-container"></div>
+
+          <!-- Viewport HUD Overlay -->
+          <div class="vhud-overlay">
+            <div class="vhud-tag" id="hud-title">Кабель МКСБ 4×4×1.2 (ГОСТ 15125-92)</div>
+            <div class="vhud-tag" style="opacity: 0.85;" id="hud-sub">Длина: 90 ед. · 16 медных жил d=1.2 мм · Без мерцания</div>
+          </div>
+
+          <!-- Interactive Action Controls -->
+          <div class="vhud-controls">
+            <button class="vctl-btn" id="btn-explode">
+              <svg viewBox="0 0 24 24"><path d="M14 10l7-7m-7 7v-6m0 6h6M10 14l-7 7m7-7v6m0-6H4"/></svg>
+              <span id="btn-explode-txt">Взрыв-схема</span>
+            </button>
+            <button class="vctl-btn" id="btn-flex">
+              <svg viewBox="0 0 24 24"><path d="M3 17c6 0 6-10 12-10s6 10 6 10"/></svg>
+              <span id="btn-flex-txt">Изгиб R≥15D</span>
+            </button>
+            <button class="vctl-btn" id="btn-rotate">
+              <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l6.1 1.7"/></svg>
+              Облет 360°
+            </button>
+            <button class="vctl-btn" id="btn-xray">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+              Рентген
+            </button>
+            <button class="vctl-btn" id="btn-reset">
+              <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Сброс
+            </button>
+          </div>
+
+          <div class="vhud-hint">
+            Вращение: ЛКМ · Зум: Колесо · Сдвиг: ПКМ · Клик по слою для ГОСТ-паспорта
+          </div>
+
+          <!-- Floating GOST Layer Passport -->
+          <div class="layer-card" id="layer-card">
+            <div class="layer-card-head">
+              <div class="layer-card-title" id="layer-title">Свинцовая оболочка</div>
+              <button id="layer-close" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size: 16px;">✕</button>
+            </div>
+            <div class="layer-card-desc" id="layer-desc">
+              Герметичная бесшовная свинцовая труба толщиной 1.4 мм (ГОСТ 15125-92). Надежно защищает сердечник от почвенной влаги.
+            </div>
+            <div class="layer-card-props" id="layer-props">
+              <div class="lp-row"><span>Толщина:</span> <span class="lp-val">1.40 мм</span></div>
+              <div class="lp-row"><span>Материал:</span> <span class="lp-val">Сплав свинца С2/С3</span></div>
+              <div class="lp-row"><span>Масса в 1 км:</span> <span class="lp-val">~1 200 кг</span></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 4. BOTTOM PANEL: PRODUCTION LOG & METALS SUMMARY -->
+    <section class="glass-card bottom-panel">
+      <div class="panel-toggle" id="btn-toggle-panel">
+        <h3>
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="#0284C7" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Развернутый производственный журнал и оценка извлеченных металлов
+        </h3>
+        <span style="font-size: 12px; font-weight: 700; color: #0284C7;" id="toggle-lbl">Свернуть / Развернуть ▼</span>
+      </div>
+
+      <div id="panel-content">
+        <div class="metals-row">
+          <div class="metal-card">
+            <div class="metal-sym cu">Cu</div>
+            <div>
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Медь 99.9% (16 жил)</div>
+              <div style="font-size: 18px; font-weight: 800; color: #C25E00;" class="tabular">~4.53 т</div>
+            </div>
+          </div>
+
+          <div class="metal-card">
+            <div class="metal-sym pb">Pb</div>
+            <div>
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Свинцовая оболочка</div>
+              <div style="font-size: 18px; font-weight: 800;" class="tabular">~34.01 т</div>
+            </div>
+          </div>
+
+          <div class="metal-card">
+            <div class="metal-sym fe">Fe</div>
+            <div>
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Стальная броня (2 ленты)</div>
+              <div style="font-size: 18px; font-weight: 800;" class="tabular">~17.00 т</div>
+            </div>
+          </div>
+
+          <div class="metal-card" style="border-color: rgba(2, 132, 199, 0.35);">
+            <div class="metal-sym" style="background: rgba(2, 132, 199, 0.15); color: #0284C7;">∑</div>
+            <div>
+              <div style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Общий вес (28 340 м ниток)</div>
+              <div style="font-size: 18px; font-weight: 800; color: #0284C7;" class="tabular">~69.43 т</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <table class="d-tbl">
+            <thead>
+              <tr>
+                <th>Период</th>
+                <th>Километраж</th>
+                <th>Вскрыто (траншея)</th>
+                <th>Демонтаж кабеля (2 нитки)</th>
+                <th>Обратная засыпка</th>
+                <th>Вывоз кабеля</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>2025 год</strong></td>
+                <td>ПК 981 – 978,2 км</td>
+                <td>2 790 м (2.79 км)</td>
+                <td>5 580 м (5.58 км)</td>
+                <td>2 790 м</td>
+                <td>5 580 м</td>
+                <td><span style="color: var(--accent-emerald); font-weight: 700;">✓ Завершено</span></td>
+              </tr>
+              <tr>
+                <td><strong>Январь 2026 г.</strong></td>
+                <td>ПК 978,2 – 977,0 км</td>
+                <td>930 м (0.93 км)</td>
+                <td>1 860 м (1.86 км)</td>
+                <td>930 м</td>
+                <td>1 860 м</td>
+                <td><span style="color: var(--accent-emerald); font-weight: 700;">✓ Завершено</span></td>
+              </tr>
+              <tr>
+                <td><strong>Сентябрь 2026 г.</strong></td>
+                <td>ПК 977,3 – 976,0 км</td>
+                <td>1 315 м (1.32 км)</td>
+                <td>2 630 м (2.63 км)</td>
+                <td>1 315 м</td>
+                <td>2 630 м</td>
+                <td><span style="color: var(--accent-emerald); font-weight: 700;">✓ Завершено</span></td>
+              </tr>
+              <tr>
+                <td><strong>Октябрь 2026 г.</strong></td>
+                <td>ПК 976,0 – 971,5 км</td>
+                <td>4 495 м (4.50 км)</td>
+                <td>8 990 м (8.99 км)</td>
+                <td>4 495 м</td>
+                <td>8 990 м</td>
+                <td><span style="color: var(--accent-emerald); font-weight: 800;">✓ Репер 10 км достигнут</span></td>
+              </tr>
+              <tr>
+                <td><strong>Ноябрь 2026 г. (1–17.11)</strong></td>
+                <td>ПК 971,5 – 966,86 км</td>
+                <td>4 640 м (4.64 км)</td>
+                <td>9 280 м (9.28 км)</td>
+                <td>3 445 м</td>
+                <td>9 280 м</td>
+                <td><span style="color: #0284C7; font-weight: 800;">● Фронт работ (14.17 км)</span></td>
+              </tr>
+              <tr style="background: rgba(2, 132, 199, 0.08); font-weight: 800;">
+                <td><strong>ИТОГО ВЫПОЛНЕНО:</strong></td>
+                <td><strong>ПК 981 – 966,86 км (14.17 км)</strong></td>
+                <td><strong>14 170 м</strong></td>
+                <td><strong>28 340 м</strong></td>
+                <td><strong>12 975 м</strong></td>
+                <td><strong>28 340 м</strong></td>
+                <td><span style="color: var(--accent-emerald); font-weight: 800;">14.17 км трассы</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SCRIPT ENGINE: THREE.JS + INTERACTIVE APPLE UI -->
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    /* ==========================================================
+       1. DATA STRUCTURE (EXACT WORKSHEET VALUES)
+       ========================================================== */
+    const DATA = {
+      planKm: 104.0,
+      dugM: 14170,
+      cableM: 28340,
+      backM: 12975,
+      transM: 28340,
+      segments: [
+        { km: 'ПК 981 – 978,2', dug: 2790, cable: 5580, back: 2790, per: '2025 год', stat: 'done' },
+        { km: 'ПК 978,2 – 977,0', dug: 930, cable: 1860, back: 930, per: 'Янв 2026', stat: 'done' },
+        { km: 'ПК 977,3 – 976,0', dug: 1315, cable: 2630, back: 1315, per: 'Сент 2026', stat: 'done' },
+        { km: 'ПК 976,0 – 971,5', dug: 4495, cable: 8990, back: 4495, per: 'Окт 2026', stat: 'done' },
+        { km: 'ПК 971,5 – 966,86', dug: 4640, cable: 9280, back: 3445, per: 'Ноя 2026 (1–17)', stat: 'work' }
+      ],
+      dailyNov: [
+        { d: '01.11', dug: 330, cable: 660, back: 270 },
+        { d: '02.11', dug: 320, cable: 640, back: 0 },
+        { d: '03.11', dug: 150, cable: 300, back: 15 },
+        { d: '04.11', dug: 290, cable: 580, back: 260 },
+        { d: '05.11', dug: 300, cable: 600, back: 390 },
+        { d: '06.11', dug: 310, cable: 620, back: 190 },
+        { d: '09.11', dug: 140, cable: 280, back: 100 },
+        { d: '10.11', dug: 400, cable: 800, back: 240 },
+        { d: '11.11', dug: 400, cable: 800, back: 220 },
+        { d: '12.11', dug: 400, cable: 800, back: 230 },
+        { d: '13.11', dug: 400, cable: 800, back: 200 },
+        { d: '14.11', dug: 200, cable: 400, back: 120 },
+        { d: '15.11', dug: 100, cable: 200, back: 490 },
+        { d: '16.11', dug: 400, cable: 800, back: 360 },
+        { d: '17.11', dug: 500, cable: 1000, back: 360 }
+      ]
+    };
+
+    /* Unit Switching */
+    function setUnit(u) {
+      document.querySelectorAll('.seg-pill').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(u === 'km' ? 'btn-unit-km' : u === 'm' ? 'btn-unit-m' : 'btn-unit-th');
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const vp = document.getElementById('v-plan'), up = document.getElementById('u-plan');
+      const vd = document.getElementById('v-dem'), ud = document.getElementById('u-dem');
+      const vg = document.getElementById('v-dug'), ug = document.getElementById('u-dug');
+      const vb = document.getElementById('v-back'), ub = document.getElementById('u-back');
+      const vt = document.getElementById('v-trans'), ut = document.getElementById('u-trans');
+
+      if (u === 'km') {
+        vp.innerText = (DATA.planKm).toFixed(1); up.innerText = 'км';
+        vd.innerText = (DATA.dugM / 1000).toFixed(2); ud.innerText = 'км';
+        vg.innerText = (DATA.dugM / 1000).toFixed(2); ug.innerText = 'км';
+        vb.innerText = (DATA.backM / 1000).toFixed(2); ub.innerText = 'км';
+        vt.innerText = (DATA.transM / 1000).toFixed(2); ut.innerText = 'км ниток';
+      } else if (u === 'm') {
+        vp.innerText = (DATA.planKm * 1000).toLocaleString('ru-RU'); up.innerText = 'м';
+        vd.innerText = DATA.dugM.toLocaleString('ru-RU'); ud.innerText = 'м';
+        vg.innerText = DATA.dugM.toLocaleString('ru-RU'); ug.innerText = 'м';
+        vb.innerText = DATA.backM.toLocaleString('ru-RU'); ub.innerText = 'м';
+        vt.innerText = DATA.transM.toLocaleString('ru-RU'); ut.innerText = 'м ниток';
+      } else if (u === 'threads') {
+        vp.innerText = (DATA.planKm * 2).toFixed(1); up.innerText = 'км (2 нитки)';
+        vd.innerText = (DATA.cableM / 1000).toFixed(2); ud.innerText = 'км (2 нитки)';
+        vg.innerText = (DATA.dugM / 1000).toFixed(2); ug.innerText = 'км траншеи';
+        vb.innerText = (DATA.backM / 1000).toFixed(2); ub.innerText = 'км засыпано';
+        vt.innerText = (DATA.transM / 1000).toFixed(2); ut.innerText = 'км вывезено';
+      }
+    }
+
+    document.getElementById('btn-unit-km').addEventListener('click', () => setUnit('km'));
+    document.getElementById('btn-unit-m').addEventListener('click', () => setUnit('m'));
+    document.getElementById('btn-unit-th').addEventListener('click', () => setUnit('threads'));
+
+    /* Theme Toggle with Sun ☀️ ↔ Moon 🌙 Morphing */
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      document.body.classList.toggle('light-theme');
+      const isDark = document.body.classList.contains('dark-theme');
+      
+      sunIcon.style.display = isDark ? 'none' : 'block';
+      moonIcon.style.display = isDark ? 'block' : 'none';
+
+      // Update 3D Background & Lights
+      if (isDark) {
+        scene.background.set(0x090A10);
+        scene.fog.color.set(0x090A10);
+        amb.intensity = 0.85;
+      } else {
+        scene.background.set(0xF1F5F9);
+        scene.fog.color.set(0xF1F5F9);
+        amb.intensity = 1.35;
+      }
+
+      drawChart();
+    });
+
+    /* Fullscreen Toggle */
+    document.getElementById('btn-fullscreen').addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+
+    /* Production Journal Toggle */
+    document.getElementById('btn-toggle-panel').addEventListener('click', () => {
+      const c = document.getElementById('panel-content');
+      c.style.display = (c.style.display === 'none') ? 'block' : 'none';
+    });
+
+    /* Picket Tape Rendering */
+    function renderPickets() {
+      const tape = document.getElementById('picket-tape');
+      tape.innerHTML = '';
+      DATA.segments.forEach((s, i) => {
+        const cell = document.createElement('div');
+        cell.className = `picket-cell ${i === DATA.segments.length - 1 ? 'active' : ''}`;
+        cell.innerHTML = `
+          <div class="km-lbl">${s.km}</div>
+          <div class="per-lbl">${s.per}</div>
+          <div class="stat-bar ${s.stat === 'work' ? 'work' : ''}"></div>
+        `;
+        cell.addEventListener('click', () => {
+          document.querySelectorAll('.picket-cell').forEach(c => c.classList.remove('active'));
+          cell.classList.add('active');
+          document.getElementById('ins-km').innerText = s.km;
+          document.getElementById('ins-per').innerText = s.per;
+          document.getElementById('ins-dug').innerText = `${s.dug.toLocaleString('ru-RU')} м`;
+          document.getElementById('ins-cab').innerText = `${s.cable.toLocaleString('ru-RU')} м`;
+          document.getElementById('ins-back').innerText = `${s.back.toLocaleString('ru-RU')} м`;
+        });
+        tape.appendChild(cell);
+      });
+    }
+
+    /* ==========================================================
+       2. CRISP CANVAS CHART (HIGH CONTRAST & DATES)
+       ========================================================== */
+    function drawChart() {
+      const cvs = document.getElementById('daily-chart');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      const w = cvs.parentElement.clientWidth - 32;
+      const h = 270;
+      cvs.width = w * dpr; cvs.height = h * dpr;
+      cvs.style.width = w + 'px'; cvs.style.height = h + 'px';
+      ctx.scale(dpr, dpr);
+
+      const isDark = document.body.classList.contains('dark-theme');
+      ctx.clearRect(0, 0, w, h);
+
+      const pad = { t: 25, r: 15, b: 42, l: 50 };
+      const cw = w - pad.l - pad.r;
+      const ch = h - pad.t - pad.b;
+
+      const data = DATA.dailyNov;
+      const maxVal = 1000;
+      const stepX = cw / data.length;
+
+      // Horizontal Gridlines & Values
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const y = pad.t + (ch / 5) * i;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+        
+        ctx.fillStyle = isDark ? '#94A3B8' : '#334155';
+        ctx.font = '600 11px JetBrains Mono';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${maxVal - i * 200} м`, pad.l - 8, y + 4);
+      }
+
+      // Triple Bars per Day + Dates
+      const bw = Math.max(stepX * 0.24, 6);
+      data.forEach((d, i) => {
+        const x = pad.l + i * stepX + stepX * 0.12;
+
+        // Dug (Amber)
+        const hDug = (d.dug / maxVal) * ch;
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath(); ctx.roundRect(x, pad.t + ch - hDug, bw, hDug, [3, 3, 0, 0]); ctx.fill();
+
+        // Cable (Cyan/Blue)
+        const hCab = (d.cable / maxVal) * ch;
+        ctx.fillStyle = '#0284C7';
+        ctx.beginPath(); ctx.roundRect(x + bw + 2, pad.t + ch - hCab, bw, hCab, [3, 3, 0, 0]); ctx.fill();
+
+        // Backfill (Violet)
+        const hBack = (d.back / maxVal) * ch;
+        ctx.fillStyle = '#7C3AED';
+        ctx.beginPath(); ctx.roundRect(x + (bw + 2) * 2, pad.t + ch - hBack, bw, hBack, [3, 3, 0, 0]); ctx.fill();
+
+        // Date Label (Crisp & High Contrast)
+        ctx.fillStyle = isDark ? '#E2E8F0' : '#0F172A';
+        ctx.font = '700 11px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(d.d, x + bw * 1.5 + 2, h - pad.b + 18);
+      });
+
+      // Cumulative Progress Curve
+      ctx.beginPath();
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 2.5;
+      data.forEach((d, i) => {
+        const x = pad.l + i * stepX + stepX * 0.5;
+        const norm = ((d.dug + d.cable / 2) / 1200) * ch;
+        const y = pad.t + ch - Math.min(norm, ch);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    window.addEventListener('resize', drawChart);
+
+    /* ==========================================================
+       3. THREE.JS 3D ENGINE (LONG CABLE + REALISTIC TRENCH)
+       ========================================================== */
+    const container = document.getElementById('viewport-box');
+    const canvas = document.getElementById('webgl-canvas');
+    const svgOverlay = document.getElementById('leader-svg');
+    const labelsBox = document.getElementById('labels-container');
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xF1F5F9);
+    scene.fog = new THREE.FogExp2(0xF1F5F9, 0.009);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(36, 18, 38);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.maxDistance = 180;
+    controls.minDistance = 6;
+    controls.target.set(0, 0, 0);
+
+    /* Studio Environment */
+    function initEnv() {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+      const envS = new THREE.Scene();
+
+      const bg = new THREE.Mesh(new THREE.SphereGeometry(60, 16, 16), new THREE.MeshBasicMaterial({ color: 0xF8FAFC, side: THREE.BackSide }));
+      envS.add(bg);
+
+      const l1 = new THREE.Mesh(new THREE.PlaneGeometry(35, 35), new THREE.MeshBasicMaterial({ color: 0xFFFFFF }));
+      l1.position.set(30, 45, 25); l1.lookAt(0,0,0); envS.add(l1);
+
+      const l2 = new THREE.Mesh(new THREE.PlaneGeometry(35, 35), new THREE.MeshBasicMaterial({ color: 0xE2E8F0 }));
+      l2.position.set(-30, 15, -25); l2.lookAt(0,0,0); envS.add(l2);
+
+      scene.environment = pmrem.fromScene(envS).texture;
+    }
+    initEnv();
+
+    /* Lighting */
+    const amb = new THREE.AmbientLight(0xffffff, 1.35);
+    scene.add(amb);
+
+    const sun = new THREE.DirectionalLight(0xfffdf5, 2.2);
+    sun.position.set(35, 55, 35);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1024;
+    sun.shadow.mapSize.height = 1024;
+    scene.add(sun);
+
+    const skyFill = new THREE.DirectionalLight(0x0284C7, 1.2);
+    skyFill.position.set(-40, 20, -30);
+    scene.add(skyFill);
+
+    /* Scene Groups */
+    const cableGroup = new THREE.Group();
+    const trenchGroup = new THREE.Group();
+    const trackGroup = new THREE.Group();
+    scene.add(cableGroup);
+    scene.add(trenchGroup);
+    scene.add(trackGroup);
+    trenchGroup.visible = false;
+    trackGroup.visible = false;
+
+    const cableLayers = [];
+    let isExploded = false;
+    let isAutoRot = false;
+    let isXRay = false;
+    let isCurved = false;
+    let currentMode = 'cable';
+
+    /* ==========================================================
+       BUILD LONG REALISTIC CABLE (ZERO Z-FIGHTING / 90 UNITS)
+       Stepped Cutaway Architecture with Open-Ended Cylinders
+       ========================================================== */
+    function buildLongCable() {
+      cableGroup.clear();
+      cableLayers.length = 0;
+
+      const matCopper = new THREE.MeshStandardMaterial({ color: 0xD97706, metalness: 0.95, roughness: 0.22 });
+      const matLead = new THREE.MeshStandardMaterial({ color: 0x828B96, metalness: 0.92, roughness: 0.42 });
+      const matPaper = new THREE.MeshStandardMaterial({ color: 0xD8C29D, roughness: 0.75, metalness: 0.05 });
+      const matSteel = new THREE.MeshStandardMaterial({ color: 0xB5BCC2, metalness: 0.96, roughness: 0.35 });
+      const matBedding = new THREE.MeshStandardMaterial({ color: 0x24242A, roughness: 0.88, metalness: 0.1 });
+      const matOuter = new THREE.MeshStandardMaterial({ color: 0x1A1A22, roughness: 0.75, metalness: 0.15 });
+
+      const quadColors = [0xDC2626, 0x2563EB, 0x16A34A, 0xCA8A04]; // Red, Blue, Green, Yellow
+
+      // Total cable spans from X = -55 to positive X
+      const startX = -55;
+      
+      const layersSpec = [
+        { name: '16 медных жил d=1.2 мм (4 четвёрки)', endX: 38, r: 0.6, expOffset: 12, desc: '16 токопроводящих медных жил d=1.2 мм, скрученных в 4 звездные четверки вокруг корделя (ГОСТ 15125-92).', props: { 'Диаметр жил': '1.20 мм', 'Число жил': '16 (4×4)', 'Материал': 'Медь ММ электротехническая' } },
+        { name: 'Полистирольная изоляция четвёрок', endX: 26, r: 1.8, expOffset: 9, desc: 'Индивидуальная кордельно-полистирольная изоляция четверок со стандартной цветовой маркировкой.', props: { 'Тип изоляции': 'Полистирол ПС-1', 'Сопротивление': '≥ 10 000 МОм·км' } },
+        { name: 'Поясная кабельная изоляция', endX: 14, r: 2.3, rIn: 1.8, expOffset: 6, desc: 'Многослойная кабельная бумага К-120 с перекрытием 33%, пропитанная изоляционным составом.', props: { 'Материал': 'Бумага кабельная', 'Толщина': '0.60 мм' } },
+        { name: 'Свинцовая оболочка (сплав С2/С3)', endX: 2, r: 2.8, rIn: 2.3, expOffset: 2, desc: 'Бесшовная свинцовая труба толщиной 1.4 мм. 100% герметичность против почвенной влаги.', props: { 'Толщина': '1.40 мм', 'Масса свинца': '~1 200 кг/км', 'ГОСТ': 'ГОСТ 15125-92' } },
+        { name: 'Битумно-джутовая подушка', endX: -10, r: 3.2, rIn: 2.8, expOffset: -2, desc: 'Защитная демпфирующая постель под броню из битумного состава и кабельной пряжи.', props: { 'Толщина': '1.0 мм', 'Назначение': 'Защита свинца' } },
+        { name: 'Стальная ленточная броня (Б)', endX: -22, r: 3.6, rIn: 3.2, expOffset: -6, desc: 'Две оцинкованные стальные ленты толщиной 0.5 мм со спиральной навивкой и перехлестом зазоров.', props: { 'Материал': 'Сталь оцинкованная', 'Толщина': '2 × 0.5 мм', 'ГОСТ': 'ГОСТ 7006-72' } },
+        { name: 'Наружный защитный покров', endX: -34, r: 4.0, rIn: 3.6, expOffset: -10, desc: 'Наружный слой из битумного компаунда и пропитанной пряжи. Общий диаметр 31.2 мм.', props: { 'Наружный диаметр': '31.2 мм', 'Масса 1 км нитки': '~2 450 кг' } }
+      ];
+
+      layersSpec.forEach((spec, idx) => {
+        const layerGroup = new THREE.Group();
+        layerGroup.name = spec.name;
+
+        const len = spec.endX - startX;
+        const centerX = startX + len / 2;
+
+        if (idx === 0) {
+          // Central Paper Cordel
+          const cordelGeo = new THREE.CylinderGeometry(0.48, 0.48, len, 24, 1, true);
+          cordelGeo.rotateZ(Math.PI / 2);
+          const cordel = new THREE.Mesh(cordelGeo, matPaper);
+          cordel.position.x = centerX;
+          layerGroup.add(cordel);
+
+          // 16 Copper Wires in 4 Star-Quads
+          const pitch = 0.22;
+          for (let q = 0; q < 4; q++) {
+            const baseAngle = (q * Math.PI) / 2;
+            for (let w = 0; w < 4; w++) {
+              const subAngle = (w * Math.PI) / 2;
+              const points = [];
+              const segments = 60;
+              for (let s = 0; s <= segments; s++) {
+                const x = startX + (s / segments) * len;
+                const a = baseAngle + x * pitch;
+                const qx = Math.cos(a) * 1.1;
+                const qy = Math.sin(a) * 1.1;
+                const wx = qx + Math.cos(a + subAngle) * 0.38;
+                const wy = qy + Math.sin(a + subAngle) * 0.38;
+                points.push(new THREE.Vector3(x, wy, wx));
+              }
+              const curve = new THREE.CatmullRomCurve3(points);
+              const wire = new THREE.Mesh(new THREE.TubeGeometry(curve, 50, 0.16, 8, false), matCopper);
+              layerGroup.add(wire);
+            }
+          }
+        } else if (idx === 1) {
+          // 4 Quad Colored Helical Sleeves
+          const pitch = 0.22;
+          for (let q = 0; q < 4; q++) {
+            const baseAngle = (q * Math.PI) / 2;
+            const points = [];
+            const segments = 50;
+            for (let s = 0; s <= segments; s++) {
+              const x = startX + (s / segments) * len;
+              const a = baseAngle + x * pitch;
+              points.push(new THREE.Vector3(x, Math.sin(a) * 1.1, Math.cos(a) * 1.1));
+            }
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeMat = new THREE.MeshStandardMaterial({ color: quadColors[q], roughness: 0.45 });
+            layerGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 45, 0.65, 12, false), tubeMat));
+          }
+        } else {
+          // Strict Hollow Cylinders with openEnded: true (ZERO Z-FIGHTING)
+          const mat = (idx === 2) ? matPaper : (idx === 3) ? matLead : (idx === 4) ? matBedding : (idx === 5) ? matSteel : matOuter;
+          
+          const cylGeo = new THREE.CylinderGeometry(spec.r, spec.r, len, 48, 1, true);
+          cylGeo.rotateZ(Math.PI / 2);
+          const cyl = new THREE.Mesh(cylGeo, mat);
+          cyl.position.x = centerX;
+          layerGroup.add(cyl);
+
+          // Non-overlapping Ring Cut at specific end position
+          const ringGeo = new THREE.RingGeometry(spec.rIn, spec.r, 48);
+          ringGeo.rotateY(Math.PI / 2);
+          const ring = new THREE.Mesh(ringGeo, mat);
+          ring.position.x = spec.endX;
+          layerGroup.add(ring);
+        }
+
+        layerGroup.userData = {
+          spec: spec,
+          origX: 0,
+          expX: spec.expOffset,
+          anchorX: spec.endX - 3,
+          radius: spec.r
+        };
+
+        cableGroup.add(layerGroup);
+        cableLayers.push(layerGroup);
+      });
+
+      cableGroup.position.set(0, 0, 0);
+    }
+
+    /* ==========================================================
+       BUILD REALISTIC 3D TRENCH (SLOPED STRATA, SAND, 2 CABLES)
+       SNiP Trapezoidal Cut (1.2m depth, 0.8m bottom, 1.6m top)
+       ========================================================== */
+    function buildRealisticTrench() {
+      trenchGroup.clear();
+
+      // Earth & Sand Materials
+      const matTopsoil = new THREE.MeshStandardMaterial({ color: 0x6E5038, roughness: 0.95 }); // Steppe soil
+      const matStrata = new THREE.MeshStandardMaterial({ color: 0x543A24, roughness: 0.92 });  // Clay/loam strata
+      const matSand = new THREE.MeshStandardMaterial({ color: 0xD8B775, roughness: 0.85 });    // Compacted sand
+      const matCable = new THREE.MeshStandardMaterial({ color: 0x242630, metalness: 0.55, roughness: 0.55 });
+      const matTape = new THREE.MeshStandardMaterial({ color: 0xF59E0B, roughness: 0.35 });    // Yellow ribbon
+
+      const trenchLen = 75;
+      const depth = 8;        // 1.2 meters scaled
+      const bottomW = 6;      // 0.8 meters scaled
+      const topW = 14;        // 1.6 meters scaled
+
+      // Full Ground Cross-Section with Trapezoidal Cut
+      const shape = new THREE.Shape();
+      shape.moveTo(-28, -depth - 1.5);
+      shape.lineTo(-28, 0);
+      shape.lineTo(-topW / 2, 0);
+      shape.lineTo(-bottomW / 2, -depth);
+      shape.lineTo(bottomW / 2, -depth);
+      shape.lineTo(topW / 2, 0);
+      shape.lineTo(28, 0);
+      shape.lineTo(28, -depth - 1.5);
+      shape.closePath();
+
+      const extrudeSettings = { depth: trenchLen, bevelEnabled: false };
+      const earthGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      earthGeo.rotateY(Math.PI / 2);
+      earthGeo.translate(-trenchLen / 2, 0, 0);
+
+      const earthMesh = new THREE.Mesh(earthGeo, matStrata);
+      earthMesh.receiveShadow = true;
+      trenchGroup.add(earthMesh);
+
+      // Excavated Soil Mounds (Отвалы грунта вдоль бровки)
+      const bermGeo = new THREE.ConeGeometry(2.8, trenchLen, 12);
+      bermGeo.rotateZ(Math.PI / 2);
+      const leftBerm = new THREE.Mesh(bermGeo, matTopsoil);
+      leftBerm.position.set(0, 1.2, -10.5);
+      trenchGroup.add(leftBerm);
+
+      const rightBerm = new THREE.Mesh(bermGeo, matTopsoil);
+      rightBerm.position.set(0, 1.2, 10.5);
+      trenchGroup.add(rightBerm);
+
+      // Compacted Sand Bedding (Песчаная подушка 100 мм)
+      const sandGeo = new THREE.BoxGeometry(trenchLen, 0.8, bottomW);
+      const sandBed = new THREE.Mesh(sandGeo, matSand);
+      sandBed.position.set(0, -depth + 0.4, 0);
+      sandBed.receiveShadow = true;
+      trenchGroup.add(sandBed);
+
+      // Two Parallel МКСБ Cables (Нить 1 и Нить 2 с расстоянием 100 мм)
+      const cableRadius = 0.72;
+      const cGeo = new THREE.CylinderGeometry(cableRadius, cableRadius, trenchLen, 32);
+      cGeo.rotateZ(Math.PI / 2);
+
+      const thread1 = new THREE.Mesh(cGeo, matCable);
+      thread1.position.set(0, -depth + 1.0, -1.3);
+      thread1.castShadow = true;
+      trenchGroup.add(thread1);
+
+      const thread2 = new THREE.Mesh(cGeo, matCable);
+      thread2.position.set(0, -depth + 1.0, 1.3);
+      thread2.castShadow = true;
+      trenchGroup.add(thread2);
+
+      // Yellow Warning Signal Tape ("Осторожно, кабель связи!")
+      const tapeGeo = new THREE.PlaneGeometry(trenchLen, 0.8);
+      tapeGeo.rotateX(-Math.PI / 2);
+      const tape = new THREE.Mesh(tapeGeo, matTape);
+      tape.position.set(0, -depth + 3.2, 0);
+      trenchGroup.add(tape);
+
+      // CAD Dimension Callout Tags (High Contrast Floating Badges)
+      const makeTag = (text, pos) => {
+        const c = document.createElement('canvas');
+        c.width = 360; c.height = 80;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#0F172A';
+        ctx.beginPath();
+        ctx.roundRect(4, 4, 352, 72, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#0284C7';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, 180, 48);
+
+        const tex = new THREE.CanvasTexture(c);
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+        sp.position.copy(pos);
+        sp.scale.set(9.0, 2.0, 1);
+        trenchGroup.add(sp);
+      };
+
+      makeTag('Глубина h = 1.20 м', new THREE.Vector3(-20, 2.5, -bottomW / 2 - 1.5));
+      makeTag('Ширина дна b = 0.80 м', new THREE.Vector3(-20, -depth + 2.4, 0));
+      makeTag('Нить №1 (Основная)', new THREE.Vector3(12, -depth + 2.6, -1.3));
+      makeTag('Нить №2 (Резерв)', new THREE.Vector3(12, -depth + 2.6, 1.3));
+      makeTag('Сигнальная лента 0.4м', new THREE.Vector3(-4, -depth + 4.6, 0));
+    }
+
+    /* 3D Track Model */
+    function buildTrack() {
+      trackGroup.clear();
+      const terr = new THREE.Mesh(new THREE.PlaneGeometry(90, 40, 12, 12).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xE2E8F0 }));
+      terr.position.y = -2; trackGroup.add(terr);
+
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 85, 24).rotateZ(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x0284C7, metalness: 0.7 }));
+      pipe.position.set(0, -1, -8); trackGroup.add(pipe);
+
+      const trenchMesh = new THREE.Mesh(new THREE.BoxGeometry(80, 0.5, 1.0), new THREE.MeshStandardMaterial({ color: 0x059669 }));
+      trenchMesh.position.set(0, -1.6, 2); trackGroup.add(trenchMesh);
+    }
+
+    buildLongCable();
+    buildRealisticTrench();
+    buildTrack();
+
+    /* Leader Lines */
+    function updateLeaderLines() {
+      if (currentMode !== 'cable') {
+        svgOverlay.innerHTML = ''; labelsBox.innerHTML = '';
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      const w = rect.width; const h = rect.height;
+      let svgHtml = ''; labelsBox.innerHTML = '';
+
+      cableLayers.forEach((l, i) => {
+        const anchor = new THREE.Vector3(l.userData.anchorX, l.userData.radius * 0.95, 0);
+        l.localToWorld(anchor);
+
+        const screenPos = anchor.clone().project(camera);
+        if (screenPos.z > 1) return;
+
+        const x = (screenPos.x * 0.5 + 0.5) * w;
+        const y = (-(screenPos.y * 0.5) + 0.5) * h;
+
+        const isUp = i % 2 === 0;
+        const labelX = x + (i % 2 === 0 ? 80 : -80);
+        const labelY = y + (isUp ? -50 - (i * 9) : 45 + (i * 8));
+
+        svgHtml += `
+          <polyline points="${x},${y} ${labelX},${labelY}" fill="none" stroke="#0284C7" stroke-width="1.4" stroke-dasharray="3,3" />
+          <circle cx="${x}" cy="${y}" r="3" fill="#0284C7" />
+        `;
+
+        const lbl = document.createElement('div');
+        lbl.className = 'leader-label';
+        lbl.style.left = `${labelX}px`; lbl.style.top = `${labelY}px`;
+        lbl.innerText = l.userData.spec.name;
+        lbl.onclick = (e) => {
+          e.stopPropagation();
+          showLayer(l.userData.spec);
+        };
+        labelsBox.appendChild(lbl);
+      });
+
+      svgOverlay.innerHTML = svgHtml;
+    }
+
+    function showLayer(s) {
+      document.getElementById('layer-title').innerText = s.name;
+      document.getElementById('layer-desc').innerText = s.desc;
+      const pb = document.getElementById('layer-props');
+      pb.innerHTML = '';
+      if (s.props) {
+        Object.entries(s.props).forEach(([k, v]) => {
+          pb.innerHTML += `<div class="lp-row"><span>${k}:</span> <span class="lp-val">${v}</span></div>`;
+        });
+      }
+      document.getElementById('layer-card').classList.add('open');
+    }
+
+    document.getElementById('layer-close').addEventListener('click', () => {
+      document.getElementById('layer-card').classList.remove('open');
+    });
+
+    /* Mode switching */
+    function switchMode(m) {
+      currentMode = m;
+      document.querySelectorAll('.vtab').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(m === 'cable' ? 'tab-cable' : m === 'trench' ? 'tab-trench' : 'tab-track');
+      if (activeBtn) activeBtn.classList.add('active');
+
+      cableGroup.visible = (m === 'cable');
+      trenchGroup.visible = (m === 'trench');
+      trackGroup.visible = (m === 'track');
+
+      const titleEl = document.getElementById('hud-title');
+      const subEl = document.getElementById('hud-sub');
+      const bExp = document.getElementById('btn-explode');
+      const bFlx = document.getElementById('btn-flex');
+
+      if (m === 'cable') {
+        titleEl.innerText = 'Кабель МКСБ 4×4×1.2 (ГОСТ 15125-92)';
+        if (subEl) subEl.innerText = 'Длина: 90 ед. · 16 медных жил d=1.2 мм · Без мерцания';
+        bExp.style.display = 'flex'; bFlx.style.display = 'flex';
+        gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.9 });
+        controls.target.set(0, 0, 0);
+      } else if (m === 'trench') {
+        titleEl.innerText = 'Двухниточная траншея (1.2м в грунте)';
+        if (subEl) subEl.innerText = 'Глубина h = 1.20 м · Ширина дна b = 0.80 м · 2 нитки кабеля связи';
+        bExp.style.display = 'none'; bFlx.style.display = 'none';
+        gsap.to(camera.position, { x: 32, y: 34, z: 42, duration: 0.9 });
+        controls.target.set(0, -3, 0);
+      } else if (m === 'track') {
+        titleEl.innerText = '3D-Трасса (Степной участок САЦ)';
+        if (subEl) subEl.innerText = 'Участок 880–1134 км · Газопровод САЦ-4 · Джангалинское ЛПУ';
+        bExp.style.display = 'none'; bFlx.style.display = 'none';
+        gsap.to(camera.position, { x: 0, y: 45, z: 55, duration: 0.9 });
+        controls.target.set(0, 0, 0);
+      }
+    }
+
+    document.getElementById('tab-cable').addEventListener('click', () => switchMode('cable'));
+    document.getElementById('tab-trench').addEventListener('click', () => switchMode('trench'));
+    document.getElementById('tab-track').addEventListener('click', () => switchMode('track'));
+
+    /* Camera Presets */
+    document.getElementById('cam-iso').addEventListener('click', () => {
+      gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8 });
+      controls.target.set(0, currentMode === 'trench' ? -4 : 0, 0);
+    });
+    document.getElementById('cam-front').addEventListener('click', () => {
+      gsap.to(camera.position, { x: 55, y: 0, z: 0, duration: 0.8 });
+      controls.target.set(0, currentMode === 'trench' ? -4 : 0, 0);
+    });
+    document.getElementById('cam-side').addEventListener('click', () => {
+      gsap.to(camera.position, { x: 0, y: 0, z: 55, duration: 0.8 });
+      controls.target.set(0, currentMode === 'trench' ? -4 : 0, 0);
+    });
+    document.getElementById('cam-top').addEventListener('click', () => {
+      gsap.to(camera.position, { x: 0, y: 60, z: 0.1, duration: 0.8 });
+      controls.target.set(0, currentMode === 'trench' ? -4 : 0, 0);
+    });
+
+    /* Controls: Explode, Flex, Rotate, XRay, Reset */
+    document.getElementById('btn-explode').addEventListener('click', () => {
+      isExploded = !isExploded;
+      document.getElementById('btn-explode-txt').innerText = isExploded ? 'Собрать' : 'Взрыв-схема';
+      document.getElementById('btn-explode').classList.toggle('active', isExploded);
+
+      cableLayers.forEach(l => {
+        const tx = isExploded ? l.userData.expX : l.userData.origX;
+        gsap.to(l.position, { x: tx, duration: 1.0, ease: 'power3.out' });
+      });
+    });
+
+    document.getElementById('btn-flex').addEventListener('click', () => {
+      isCurved = !isCurved;
+      document.getElementById('btn-flex').classList.toggle('active', isCurved);
+      gsap.to(cableGroup.rotation, { y: isCurved ? 0.35 : 0, z: isCurved ? -0.15 : 0, duration: 1.0 });
+    });
+
+    document.getElementById('btn-rotate').addEventListener('click', () => {
+      isAutoRot = !isAutoRot;
+      controls.autoRotate = isAutoRot;
+      controls.autoRotateSpeed = 2.0;
+      document.getElementById('btn-rotate').classList.toggle('active', isAutoRot);
+    });
+
+    document.getElementById('btn-xray').addEventListener('click', () => {
+      isXRay = !isXRay;
+      document.getElementById('btn-xray').classList.toggle('active', isXRay);
+      scene.traverse(o => { if (o.isMesh && o.material) o.material.wireframe = isXRay; });
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      gsap.to(camera.position, { x: 36, y: 18, z: 38, duration: 0.8 });
+      controls.target.set(0, 0, 0);
+    });
+
+    /* Raycasting for Layer Inspection */
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(cableGroup.children, true);
+      if (hits.length > 0) {
+        let r = hits[0].object;
+        while (r.parent && r.parent !== cableGroup) r = r.parent;
+        if (r.userData && r.userData.spec) {
+          showLayer(r.userData.spec);
+          gsap.fromTo(r.scale, { x: 1.05, y: 1.05, z: 1.05 }, { x: 1, y: 1, z: 1, duration: 0.35 });
+        }
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      const w = container.clientWidth, h = container.clientHeight;
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      updateLeaderLines();
+    }
+    animate();
+
+    /* Initial Setup */
+    renderPickets();
+    drawChart();
+  </script>
+</body>
+</html>
